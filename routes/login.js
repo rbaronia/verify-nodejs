@@ -136,8 +136,14 @@ router.post('/', async (req, res, next) => {
     } else {
       req.session.scimToken = adaptive.getToken(req.session.transactionId);
     }
-    let user = new User(appClientConfig,req.session.scimToken);
-    let scim = await user.getUser();
+    let scim;
+    if (!req.session.user) {
+      let user = new User(appClientConfig,req.session.token.access_token);
+      scim = await user.getUser();
+      req.session.user = scim;
+    } else {
+      scim = req.session.user;
+    }
     if (scim["urn:ietf:params:scim:schemas:extension:ibm:2.0:User"].pwdReset) {
       req.session.pwd = req.body.j_password;
       res.render('ecommerce-new-password');

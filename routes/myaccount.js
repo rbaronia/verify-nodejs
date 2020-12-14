@@ -19,9 +19,14 @@ const mustBeAuthenticated = (req, res, next) => {
 };
 
 router.get('/', mustBeAuthenticated, async (req, res, _next) => {
-  let user = new User(userClientConfig,req.session.token.access_token);
-  let scim = await user.getUser();
-  req.session.user = scim;
+  let scim;
+  if (!req.session.user) {
+    let user = new User(userClientConfig,req.session.token.access_token);
+    scim = await user.getUser();
+    req.session.user = scim;
+  } else {
+    scim = req.session.user;
+  }
 
   res.render('ecommerce-account', scim);
 });

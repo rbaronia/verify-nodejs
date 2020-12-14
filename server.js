@@ -6,6 +6,7 @@ const session = require('express-session');
 const createError = require('http-errors');
 
 const OAuthClientCreds = require('./oauth-client-creds.js').OAuthClientCreds;
+const User = require('./verify-nativeapp-sdk').User;
 
 const path = require('path');
 const app = express();
@@ -72,8 +73,16 @@ app.get('/home', mustBeAuthenticated, (req, res) => {
   res.render('ecommerce-memberhome');
 });
 
-app.get('/cart', (req, res) => {
-  res.render('ecommerce-cart');
+app.get('/cart', mustBeAuthenticated, async (req, res) => {
+  let scim;
+  if (!req.session.user) {
+    let user = new User(clientAuthConfig,req.session.token.access_token);
+    scim = await user.getUser();
+    req.session.user = scim;
+  } else {
+    scim = req.session.user;
+  }
+  res.render('ecommerce-cart', scim);
 });
 
 app.get('/results', (req, res) => {
@@ -88,7 +97,26 @@ app.get('/success', mustBeAuthenticated, (req, res) => {
   res.render('ecommerce-success');
 });
 
-app.post('/checkout', mustBeAuthenticated, (req, res) => {
+app.post('/checkout', mustBeAuthenticated, async (req, res) => {
+  let user = new User(clientAuthConfig,req.session.token.access_token);
+  let currentUser = req.session.user;
+
+  if (req.body.storemobile == "on") {
+    currentUser.phoneNumbers[0] = {type: "mobile", value: req.body.mobile};
+  }
+
+  if (req.body.storeaddress == "on") {
+    currentUser.addresses[0] = {type: "work",
+      streetAddress: req.body.street,
+      locality: req.body.city,
+      region: req.body.region,
+      country: req.body.country
+    };
+  }
+
+  let result = await user.updateUser(currentUser);
+  req.session.user = result;
+
   res.redirect('/success');
 });
 
@@ -101,6 +129,7 @@ app.get('/logout', (req, res) => {
   // get id from cookie
   delete req.session.authenticated;
   delete req.session.token;
+  delete req.session.user;
   res.redirect('/');
 });
 

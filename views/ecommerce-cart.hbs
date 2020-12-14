@@ -90,57 +90,59 @@
 
 							<div class="sa_formRow sa_visible">
 								<label>Address</label>
-								<input type="text" placeholder="" value="7 rue des Lilas" onfocus="this.placeholder = ''">
+								<input name="street" type="text" placeholder="" value="{{addresses.0.streetAddress}}" onfocus="this.placeholder = ''">
 								<div class="sa_inputLine"></div>
 							</div>
 
 							<div class="sa_formRow sa_visible">
 								<label>City</label>
-								<input type="text" placeholder="" value="Saint Cloud" onfocus="this.placeholder = ''">
+								<input name="city" type="text" placeholder="" value="{{addresses.0.locality}}" onfocus="this.placeholder = ''">
 								<div class="sa_inputLine"></div>
 							</div>
 
 							<div class="sa_formRow sa_visible">
-								<label>State</label>
-								<input type="text" placeholder="" value="" onfocus="this.placeholder = ''">
+								<label>State/Region</label>
+								<input name="region" type="text" placeholder="" value="{{addresses.0.region}}" onfocus="this.placeholder = ''">
 								<div class="sa_inputLine"></div>
 							</div>
 
 							<div class="sa_formRow sa_visible">
 								<label>Country</label>
-								<input type="text" placeholder="" value="France" onfocus="this.placeholder = ''">
+								<input name="country" type="text" placeholder="" value="{{addresses.0.country}}" onfocus="this.placeholder = ''">
 								<div class="sa_inputLine"></div>
 							</div>
 
                            <div class="sa_form-row">
-                           	<input type="checkbox" value="" id="rememberme"> <label for="rememberme" data-t-pick-up-store>Pickup in store</label>
+                               <input checked name="storeaddress" type="checkbox" id="storeaddress">
+                               <label for="storeaddress">Store this shipping address on my account.</label>
                            </div>
 
 						</div>
 
 						<div class="sa_account-details-box">
 							<div class="sa_account-box-head">
-								<strong>PAYMENT DETAILS</strong>
+								<strong>Tracking your order</strong>
 
                             </div>
 
                             <div class="sa_formRow sa_visible">
-								<label>Email Address</label>
-								<input type="text" placeholder="" value="marie.castro.achats@gmail.com" onfocus="this.placeholder = ''">
+								<label>Mobile number for shipping alerts</label>
+								<input name="mobile" type="text" placeholder="" value="{{phoneNumbers.0.value}}" onfocus="this.placeholder = ''">
 								<div class="sa_inputLine"></div>
 							</div>
 
-							<div class="sa_formRow sa_visible">
-								<label>Credit Card Type</label>
-								<input type="text" placeholder="" value="Visa" onfocus="this.placeholder = ''">
-								<div class="sa_inputLine"></div>
-							</div>
 
-                            <div class="sa_formRow sa_visible">
-								<label>Credit Card Number</label>
-								<input type="text" placeholder="" value="*********6745" onfocus="this.placeholder = ''">
-								<div class="sa_inputLine"></div>
-							</div>
+              <div class="sa_formRow-container clearfix">
+
+                <input checked name="storemobile" type="checkbox" id="storemobile">
+                <label for="storemobile">Store this number on my account.</label>
+              </div>
+
+            <div class="sa_formRow-container clearfix">
+
+              <input checked name="emailreceipt" type="checkbox" id="emailreceipt">
+              <label for="emailreceipt">Send a receipt to my e-mail address.</label>
+            </div>
 
 
 						</div>
