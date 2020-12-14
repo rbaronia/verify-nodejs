@@ -1,0 +1,14 @@
+
+TENANT_URL=https://xxxxx.verify.ibm.com
+APP_CLIENT_ID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+APP_CLIENT_SECRET=xxxxxxxxxx
+CLIENT_ID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+CLIENT_SECRET=xxxxxxxxxx
+REDIRECT_URI=http://localhost:3000/auth/callback
+REDIRECT_URI_ROUTE=/auth/callback
+RESPONSE_TYPE=
+FLOW_TYPE=
+SCOPE=
+PASSWORD_IDENTITY_SOURCE_ID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+AUTHENTICATOR_PROFILEID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+SESSION_SECRET=somethinghardtoguess

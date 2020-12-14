@@ -1,0 +1,46 @@
+{
+  "_from": "verify-nativeapp-sdk",
+  "_id": "verify-nativeapp-sdk@0.0.1",
+  "_inBundle": false,
+  "_location": "/verify-nativeapp-sdk",
+  "_phantomChildren": {},
+  "_requested": {
+    "type": "tag",
+    "raw": "verify-nativeapp-sdk",
+    "name": "verify-nativeapp-sdk",
+    "escapedName": "verify-nativeapp-sdk",
+    "rawSpec": "",
+    "saveSpec": null,
+    "fetchSpec": "latest"
+  },
+  "_requiredBy": [
+    "#USER",
+    "/"
+  ],
+  "_spec": "verify-nativeapp-sdk",
+  "bundleDependencies": false,
+  "dependencies": {
+    "axios": "^0.19.2",
+    "lru-cache": "^6.0.0",
+    "node-cache": "^5.1.2",
+    "uuid": "^3.4.0"
+  },
+  "deprecated": false,
+  "devDependencies": {
+    "eslint": "^6.8.0",
+    "eslint-config-google": "^0.14.0",
+    "jsdoc": "^3.6.5",
+    "minami": "^1.2.3",
+    "mocha": "^7.2.0"
+  },
+  "keywords": [],
+  "license": "MIT",
+  "main": "lib/index.js",
+  "name": "verify-nativeapp-sdk",
+  "scripts": {
+    "clean": "rm -r node_modules package-lock.json",
+    "docs": "rm -r docs 2>/dev/null; jsdoc -r lib -d docs -t node_modules/minami",
+    "test": "mocha"
+  },
+  "version": "0.0.1"
+}

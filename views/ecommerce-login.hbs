@@ -1,0 +1,94 @@
+<!doctype html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+
+	<meta name="viewport" content="width=device-width, maximum-scale=1">
+	<meta name="format-detection" content="telephone=no" />
+
+	<link href="/static/fonts/fonts.css" type="text/css" rel="stylesheet">
+	<link href="/static/style.css" type="text/css" rel="stylesheet">
+
+	<title>Login - TrustMe Store</title>
+
+</head>
+
+<body class="sa_body">
+
+	<div class="sa_outer-container">
+
+		<!--outer-wrap-->
+		<section class="sa_container-wrap sa_blue-head">
+			<div class="sa_wrapper clearfix">
+				<div class="sa_section-account-details">
+					<!--logo-->
+					<div class="sa_logo"><a href="/"><img src="/static/images/logo-shop.svg" alt="" id="shop-logo" data-t-ecommerce-logo></a></div>
+					<!--logo-->
+					<br>
+					<h2>Welcome to Our Beautiful Online Shop!</h2>
+					<br /><br />
+
+
+					<div class="sa_input-container">
+						{{#if factors.password.enabled}}
+							<div class="sa_account-details-box-2">
+								<div class="sa_account-box-head">
+									<strong>Password Login</strong>
+								</div>
+								<form action="login" method="post">
+									<div class="sa_formRow">
+										<label>Email</label>
+										<input name="j_username" id="form-username" class="sy-input--text-username" type="text" placeholder="Email" onFocus="this.placeholder = ''">
+										<div class="inputLine"></div>
+									</div>
+
+									<div class="sa_formRow">
+										<label>Password</label>
+										<input type="text" name="j_password" id="form-password" class="sy-input--text-password" placeholder="Password" onFocus="this.placeholder = ''">
+										<div class="show-password active"></div>
+										<div class="inputLine"></div>
+									</div>
+									<div id="login_failed">test</div>
+
+									<div class="sa_formRow-container clearfix">
+
+										<div class="sa_formRow-col"> <input type="checkbox" checked value="" id="rememberme"> <label for="rememberme">Remember me</label> </div>
+										<!--class="sa_custom-input"-->
+										<div class="sa_formRow-col"> <a href="">Forgot Password?</a> </div>
+
+									</div>
+
+									<div class="sa_formRow_bottom">
+										<button type="submit" data-t-submit-login-btn>Login</button>
+								</form>
+							</div>
+					</div>
+					{{/if}}
+
+					{{#if factors.qr.enabled}}
+						<div class="sa_account-details-box-2">
+							<div class="sa_account-box-head">
+								<strong>QRCode Login</strong>
+							</div>
+							<div class="sa_formRow">
+								<p>If you have registered an authenticator app, scan the QR Code to login</p>
+								<img src='data:image/png;base64,{{factors.qr.code}}' alt='qrcode' />
+							</div>
+						</div>
+						<script type="text/javascript" src="/static/js/qrpolling.js"></script>
+					{{/if}}
+				</div>
+				New to TrustMe Shop? <a href="register" id="open-new-account-link" class="sa_link" data-t-open-new-account-link>Open an Account</a>
+			</div>
+	</div>
+	</section>
+	<!--outer-wrap-->
+	</div>
+
+	<script src="/static/js/ajax.jquery.224.js"></script>
+	<script src="/static/js/init.js"></script>
+
+</body>
+
+</html>
