@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Adaptive = require('../verify-nativeapp-sdk').Adaptive;
+const User = require('../verify-nativeapp-sdk').User;
 const createError = require('http-errors');
 
 // load contents of .env into process.env
@@ -85,8 +86,9 @@ router.post('/newpwd', async (req, res, next) => {
     let pwd = req.session.pwd;
     delete req.session.pwd;
     try {
-      result = await adaptive.updateUserPassword(req.session.transactionId,
-        pwd, req.body.newpwd1);
+      let user = new User(appClientConfig,req.session.scimToken);
+      result = await user.updateUserPassword(pwd, req.body.newpwd1);
+      delete req.session.scimToken;
       next()
     } catch (error) {
       console.log(error);
@@ -129,11 +131,19 @@ router.post('/', async (req, res, next) => {
 
   if (!done) {
     req.session.passresult = result;
-    let user = await adaptive.getUser(req.session.transactionId);
-    if (user.pwdReset) {
+    if (result.token.access_token) {
+      req.session.scimToken = result.token.access_token;
+    } else {
+      req.session.scimToken = adaptive.getToken(req.session.transactionId);
+    }
+    let user = new User(appClientConfig,req.session.scimToken);
+    let scim = await user.getUser();
+    if (scim["urn:ietf:params:scim:schemas:extension:ibm:2.0:User"].pwdReset) {
       req.session.pwd = req.body.j_password;
       res.render('ecommerce-new-password');
       done = true;
+    } else {
+      delete req.session.scimToken;
     }
   }
 

@@ -37,8 +37,6 @@ const QuestionsService = require('./services/factors/questionsService');
 const PushService = require('./services/factors/pushService');
 const FactorService = require('./services/factors/factorService');
 const TokenService = require('./services/oidc/tokenService');
-const ScimService = require('./services/users/scimService');
-const DpcmService = require('./services/dpcm/dpcmService');
 
 /**
  * Class representing the PDA (Policy Driven Authentication) SDK. Used to
@@ -480,6 +478,7 @@ class Adaptive {
            `context, assertion)]`, 'assessment:', assessment);
        if (!assessment.allowedFactors) {
          // No 2FA required, return token.
+         this._transactionFunctions.deleteTransaction(transactionId);
          return {status: 'allow', token: assessment};
        }
      } catch (error) {
@@ -655,63 +654,6 @@ class Adaptive {
         .getTransaction(transactionId);
 
     return transaction.assessment.access_token;
-  }
-
-  /**
-   * Get SCIM for user associated with transaction.
-   * @param {string} transactionId The identifier of the transaction received in
-   * {@link Adaptive#assessPolicy}.
-   * @return {object} SCIM object for the user
-   */
-  async getUser(transactionId) {
-    const transaction = this._transactionFunctions
-        .getTransaction(transactionId);
-
-    const scimService = new ScimService(
-        {accessToken: transaction.assessment.access_token},
-          this._config.tenantUrl);
-
-    const user = await scimService.getUser();
-    console.log(`[${Adaptive.name}:getUser(transactionId)]`, 'user:', user);
-
-    var pwdReset = user['urn:ietf:params:scim:schemas:extension:ibm:2.0:User']
-      .pwdReset;
-    if (pwdReset == undefined ) pwdReset = false;
-
-    var lastLogin = user['urn:ietf:params:scim:schemas:extension:ibm:2.0:User']
-      .lastLogin;
-
-    return {pwdReset: pwdReset, lastLogin: lastLogin, scim: user};
-  }
-
-  /**
-   * Update password for user associated with transaction.
-   * @param {string} transactionId The identifier of the transaction received in
-   * {@link Adaptive#assessPolicy}.
-   * @param {string} currentPwd The current password of the user.
-   * @param {string} newPwd The new password for the user.
-   * @return {object} Response from password change operation.
-   */
-  async updateUserPassword(transactionId, currentPwd, newPwd) {
-    const transaction = this._transactionFunctions
-        .getTransaction(transactionId);
-
-    const scimService = new ScimService(
-        {accessToken: transaction.assessment.access_token},
-          this._config.tenantUrl);
-
-    var data = {
-      "newPassword": newPwd,
-      "currentPassword": currentPwd,
-      "schemas": [
-        "urn:ietf:params:scim:schemas:ibm:core:2.0:ChangePassword"
-      ]
-    }
-
-    const response = await scimService.updateUserPassword(data);
-    console.log(`[${Adaptive.name}:updateUserPassword(transactionId, currentPwd, newPwd)]`, 'response:', response);
-
-    return response;
   }
 
   /**

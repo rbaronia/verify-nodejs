@@ -58,7 +58,7 @@ class ScimService extends Service {
    */
 
   async updateUser(userObject) {
-    const response = await this.post('/v2.0/Me',userObject);
+    const response = await this.put('/v2.0/Me',userObject);
     return response.data;
   }
 

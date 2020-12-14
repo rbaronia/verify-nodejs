@@ -31,10 +31,12 @@ app.use('/static', express.static(__dirname + '/static'));
 var login = require('./routes/login');
 var mfa = require('./routes/mfa');
 var register = require('./routes/register');
+var myaccount = require('./routes/myaccount');
 
 app.use('/login', login);
 app.use('/mfa', mfa);
 app.use('/register', register);
+app.use('/myaccount', myaccount);
 
 // load contents of .env into process.env
 require('dotenv').config();
@@ -68,10 +70,6 @@ app.get('/', (req, res) => {
 app.get('/home', mustBeAuthenticated, (req, res) => {
   console.log("***TOKEN***: " + JSON.stringify(req.session.token));
   res.render('ecommerce-memberhome');
-});
-
-app.get('/myaccount', mustBeAuthenticated, (req, res) => {
-  res.render('ecommerce-account');
 });
 
 app.get('/cart', (req, res) => {

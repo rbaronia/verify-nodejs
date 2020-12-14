@@ -18,13 +18,8 @@
  * SOFTWARE.
  */
 
-const LRU = require('lru-cache');
 
-const transactionUtils = require('./utils/transactionUtils');
-const base64Utils = require('./utils/base64Utils');
 const ConfigurationError = require('./errors/configurationError');
-const TransactionError = require('./errors/transactionError');
-const TokenError = require('./errors/tokenError');
 const DpcmService = require('./services/dpcm/dpcmService');
 
 /**
@@ -36,20 +31,13 @@ class Dpcm {
   /**
    * Create a new {@link Dpcm} object.
    * @param {Object} config The configuration settings used for requests.
-   * @param {string} config.clientId The identifier of the client application.
-   * @param {string} config.clientSecret The client application secret.
    * @param {string} config.tenantUrl The URL of the tenant.
+   * @param {string} token The Access Token for accessing DPCM endpoints.
    * @throws {ConfigurationError} The configuration object doesn't contain the
    * required properties.
    */
   constructor(config,token,options) {
-    if (!config.clientId) {
-      throw new ConfigurationError(
-          `Cannot find property 'clientId' in configuration settings.`);
-    } else if (!config.clientSecret) {
-      throw new ConfigurationError(
-          `Cannot find property 'clientSecret' in configuration settings.`);
-    } else if (!config.tenantUrl) {
+    if (!config.tenantUrl) {
       throw new ConfigurationError(
           `Cannot find property 'tenantUrl' in configuration settings.`);
     }
@@ -64,10 +52,6 @@ class Dpcm {
    this._token = token;
    this._options = options;
 
-    console.log(`[${Dpcm.name}:constructor(config, token, options)]`,
-        'clientId:', this._config.clientId);
-    console.log(`[${Dpcm.name}:constructor(config, token, options)]`,
-        'clientSecret:', '****');
     console.log(`[${Dpcm.name}:constructor(config, token, options)]`,
         'tenantUrl:', this._config.tenantUrl);
     console.log(`[${Dpcm.name}:constructor(config, token, options)]`,
