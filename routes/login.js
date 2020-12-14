@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const Adaptive = require('../verify-nativeapp-sdk').Adaptive;
-const User = require('../verify-nativeapp-sdk').User;
+const Adaptive = require('./verify-nativeapp-sdk/lib/index.js').Adaptive;
+const User = require('./verify-nativeapp-sdk/lib/index.js').User;
 const createError = require('http-errors');
 
 // load contents of .env into process.env

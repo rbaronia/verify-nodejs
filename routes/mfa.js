@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const Adaptive = require('../verify-nativeapp-sdk').Adaptive;
+const Adaptive = require('./verify-nativeapp-sdk/lib/index.js').Adaptive;
 const createError = require('http-errors');
 
 // load contents of .env into process.env

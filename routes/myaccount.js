@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const createError = require('http-errors');
-const User = require('../verify-nativeapp-sdk').User;
+const User = require('./verify-nativeapp-sdk/lib/index.js').User;
 
 // load contents of .env into process.env
 require('dotenv').config();
