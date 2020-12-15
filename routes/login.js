@@ -131,14 +131,14 @@ router.post('/', async (req, res, next) => {
 
   if (!done) {
     req.session.passresult = result;
-    if (result.token.access_token) {
-      req.session.scimToken = result.token.access_token;
+    if (req.session.token) {
+      req.session.scimToken = req.session.token.access_token;
     } else {
       req.session.scimToken = adaptive.getToken(req.session.transactionId);
     }
     let scim;
     if (!req.session.user) {
-      let user = new User(appClientConfig,req.session.token.access_token);
+      let user = new User(appClientConfig,req.session.scimToken);
       scim = await user.getUser();
       req.session.user = scim;
     } else {
