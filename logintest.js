@@ -62,10 +62,15 @@ async function main() {
 
   if (username) {
 
+    // Lookup identity sources (and get the first)
+    var idSources = await adaptive.lookupIdentitySources(context,
+      result.transactionId,
+      username);
+
     // Perform password authentication and JWT exchange
     result = await adaptive.evaluatePassword(context,
       result.transactionId,
-      process.env.PASSWORD_IDENTITY_SOURCE_ID,
+      idSources[0].id,
       username, password);
 
     console.log("After First Factor: " + JSON.stringify(result));

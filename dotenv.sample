@@ -6,7 +6,6 @@ APP_CLIENT_SECRET=xxxxxxxxxx
 CLIENT_ID=
 CLIENT_SECRET=
 
-PASSWORD_IDENTITY_SOURCE_ID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 AUTHENTICATOR_PROFILEID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 
 SESSION_SECRET=somethinghardtoguess

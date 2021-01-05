@@ -41,8 +41,6 @@ router.get('/', async (req, res, next) => {
     done = true;
   }
 
-  console.log("***Policy***: " + JSON.stringify(result));
-
   if (!done && result.status == "requires") {
 
     req.session.transactionId = result.transactionId;
@@ -86,7 +84,7 @@ router.post('/newpwd', async (req, res, next) => {
     let pwd = req.session.pwd;
     delete req.session.pwd;
     try {
-      let user = new User(appClientConfig,req.session.scimToken);
+      let user = new User(appClientConfig, req.session.scimToken);
       result = await user.updateUserPassword(pwd, req.body.newpwd1);
       delete req.session.scimToken;
       next()
@@ -109,24 +107,40 @@ router.post('/', async (req, res, next) => {
     ipAddress: req.ip
   }
 
-  result = undefined;
+  let idSource;
+
   try {
-    result = await adaptive.evaluatePassword(context,
-      req.session.transactionId, process.env.PASSWORD_IDENTITY_SOURCE_ID,
-      req.body.j_username, req.body.j_password);
-
-    if (result && result.status == "allow") {
-      req.session.authenticated = true;
-      req.session.token = result.token;
-
-      // Add absolute expiry time to the token data
-      // Calculated from current time and expires_in
-      req.session.token.expirytime = date.getTime() + (result.token.expires_in * 1000);
-    }
-
+    // Lookup identity sources (and get the first)
+    let idSources = await adaptive.lookupIdentitySources(context,
+      req.session.transactionId,
+      req.body.j_username);
+    idSource = idSources[0].id;
   } catch (error) {
-    next(createError(403))
+    console.log(error);
+    next(createError(500))
     done = true;
+  }
+
+  if (!done) {
+    result = undefined;
+    try {
+      result = await adaptive.evaluatePassword(context,
+        req.session.transactionId, idSource,
+        req.body.j_username, req.body.j_password);
+
+      if (result && result.status == "allow") {
+        req.session.authenticated = true;
+        req.session.token = result.token;
+
+        // Add absolute expiry time to the token data
+        // Calculated from current time and expires_in
+        req.session.token.expirytime = date.getTime() + (result.token.expires_in * 1000);
+      }
+
+    } catch (error) {
+      next(createError(403))
+      done = true;
+    }
   }
 
   if (!done) {
@@ -138,7 +152,7 @@ router.post('/', async (req, res, next) => {
     }
     let scim;
     if (!req.session.user) {
-      let user = new User(appClientConfig,req.session.scimToken);
+      let user = new User(appClientConfig, req.session.scimToken);
       scim = await user.getUser();
       req.session.user = scim;
     } else {
@@ -171,7 +185,7 @@ router.get('/qrlogin', async (req, res, next) => {
     var verifyClient = req.app.get('verifyClient');
     var token = await verifyClient.getAccessToken();
     result = await adaptive.evaluateQR(context, req.session.transactionId, token.access_token);
-    console.log("***EVALQR***: " + JSON.stringify(result));
+
     if (result && result.status == "allow") {
       req.session.authenticated = true;
       req.session.token = result.token;
@@ -188,9 +202,9 @@ router.get('/qrlogin', async (req, res, next) => {
   }
 
   if (!done) {
-      req.session.passresult = result;
-      next();
-    }
+    req.session.passresult = result;
+    next();
+  }
 
 }, checkMfa);
 
@@ -223,9 +237,9 @@ router.get('/qrcheck', async function(req, res, _next) {
 
   var verifyClient = req.app.get('verifyClient');
 
-  let path = `${process.env.TENANT_URL}/v2.0/factors/qr/authenticate/`
-    + req.session.qrlogin.qr.id
-    + "?dsi="+req.session.qrlogin.qr.dsi
+  let path = `${process.env.TENANT_URL}/v2.0/factors/qr/authenticate/` +
+    req.session.qrlogin.qr.id +
+    "?dsi=" + req.session.qrlogin.qr.dsi
 
   let options = {
     notoken: true,

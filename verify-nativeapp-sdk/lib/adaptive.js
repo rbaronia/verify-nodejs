@@ -361,6 +361,49 @@ class Adaptive {
   }
 
   /**
+   * Lookup Identity Sources for user
+   *
+   * @param {string} transactionId The identifier of the transaction received in
+   * {@link Adaptive#assessPolicy}.
+   * @param {string} username The username to look up.
+   * @return {Promise<Object>} The result object. The result
+   * object contains an array of identity sources for this user.
+   * @example <caption><code>allow</code> result object</caption>
+   * [
+   *   {
+   *     "instanceName": "Cloud Directory",
+   *     "realm": "cloudIdentityRealm",
+   *     "id": "10a9bc20-1111-2222-3333-f6e18e31f978",
+   *     "providerType": "ibmldap",
+   *     "enabled": true,
+   *     "predefined": false,
+   *     "properties": [
+   *       {
+   *         "value": "https://xxxx.verify.ibm.com/idaas/mtfim/sps/idaas/login?identity_source_id=10a9bc20-1111-2222-3333-f6e18e31f978&login_type=local",
+   *         "key": "redirect_url"
+   *       }
+   *     ],
+   *     "status": "configured"
+   *   }
+   * ]
+   */
+  async lookupIdentitySources(context, transactionId, username) {
+    const transaction = this._transactionFunctions
+        .getTransaction(transactionId);
+
+    const passwordService = new PasswordService(
+        {accessToken: transaction.assessment.access_token},
+        this._config.tenantUrl, context);
+
+    const sources = await passwordService.lookupIdentitySources(username);
+
+    console.log(`[${Adaptive.name}:lookupIdentitySources(context, transactionId, ` +
+        `username)]`, 'sources:', sources);
+
+    return sources;
+  }
+
+  /**
    * Complete a password first-factor verification.
    *
    * Complete a password first-factor verification, validate the resulting JWT,

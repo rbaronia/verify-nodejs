@@ -28,6 +28,18 @@ const FactorService = require('../factors/factorService');
  */
 class PasswordService extends FactorService {
   /**
+   * Get identity source IDs for a username.
+   * @param {string} username The username to authenticate as.
+   * @return {Promise<Object>} The HTTP response body of the request.
+   */
+  async lookupIdentitySources(username) {
+    const response = await this.post(
+        `/v1/mgmt/idaas/user/identitysources`,
+        {"user": username});
+    return response.data;
+  }
+
+  /**
    * Attempt password authentication with an identity source.
    * @param {string} identitySourceId The identifier of an identity source
    * resolved in {@link PasswordService#resolveIdentitySource}.
