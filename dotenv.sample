@@ -3,8 +3,8 @@ TENANT_URL=https://xxxxx.verify.ibm.com
 APP_CLIENT_ID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 APP_CLIENT_SECRET=xxxxxxxxxx
 
-CLIENT_ID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
-CLIENT_SECRET=xxxxxxxxxx
+CLIENT_ID=
+CLIENT_SECRET=
 
 PASSWORD_IDENTITY_SOURCE_ID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 AUTHENTICATOR_PROFILEID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx

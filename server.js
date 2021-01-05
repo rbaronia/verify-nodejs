@@ -48,9 +48,11 @@ const clientAuthConfig = {
   clientSecret: process.env.CLIENT_SECRET,
 };
 
-const clientOauthClient = new OAuthClientCreds(clientAuthConfig);
-
-app.set('verifyClient', clientOauthClient);
+var clientOauthClient;
+if (clientAuthConfig.clientId) {
+  const clientOauthClient = new OAuthClientCreds(clientAuthConfig);
+  app.set('verifyClient', clientOauthClient);
+}
 
 const mustBeAuthenticated = (req, res, next) => {
   if (!req.session.authenticated) {
@@ -69,7 +71,6 @@ app.get('/', (req, res) => {
 });
 
 app.get('/home', mustBeAuthenticated, (req, res) => {
-  console.log("***TOKEN***: " + JSON.stringify(req.session.token));
   res.render('ecommerce-memberhome');
 });
 
