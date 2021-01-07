@@ -38,7 +38,9 @@ router.post('/', mustBeAuthenticated, async (req, res, _next) => {
   currentUser.name.givenName = req.body.firstname;
   currentUser.name.familyName = req.body.surname;
   currentUser.emails[0] = {type: "work", value: req.body.email};
+  if (!currentUser.phoneNumbers) currentUser.phoneNumbers = [];
   currentUser.phoneNumbers[0] = {type: "mobile", value: req.body.mobile};
+  if (!currentUser.addresses) currentUser.addresses = [];
   currentUser.addresses[0] = {type: "work",
     streetAddress: req.body.street,
     locality: req.body.city,

@@ -103,10 +103,12 @@ app.post('/checkout', mustBeAuthenticated, async (req, res) => {
   let currentUser = req.session.user;
 
   if (req.body.storemobile == "on") {
+    if (!currentUser.phoneNumbers) currentUser.phoneNumbers = [];
     currentUser.phoneNumbers[0] = {type: "mobile", value: req.body.mobile};
   }
 
   if (req.body.storeaddress == "on") {
+    if (!currentUser.addresses) currentUser.addresses = [];
     currentUser.addresses[0] = {type: "work",
       streetAddress: req.body.street,
       locality: req.body.city,
