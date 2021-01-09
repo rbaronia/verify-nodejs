@@ -19,6 +19,7 @@ function getOtpLabel(item) {
   if (item.type == "totp") return "Time-based OTP";
   if (item.type == "emailotp") return "E-mail OTP";
   if (item.type == "smsotp") return "SMS OTP";
+  if (item.type == "voiceotp") return "Voice OTP";
 }
 
 router.get('/', (req, res, next) => {
@@ -39,11 +40,12 @@ router.get('/', (req, res, next) => {
     var factorLookup = {};
     var factorsArray = result.enrolledFactors;
     factorsArray.forEach((item, i) => {
-      if (item.enabled) {
+      let label = getOtpLabel(item);
+      if (item.enabled && label) {
         factors.push({
           type: item.type,
           id: item.id,
-          label: getOtpLabel(item)
+          label: label
         });
         factorLookup[item.id] = item;
       }
@@ -122,6 +124,20 @@ async function challengeMfa(req, res, next) {
       done = true;
     }
 
+    if (factorLookup[req.body.factorid].type == "voiceotp") {
+      req.session.factor = factorLookup[req.body.factorid];
+
+      var otp = await adaptive.generateVoiceOTP(context,
+        req.session.transactionId, req.session.factor.id);
+
+      var message = "Please enter OTP code received via phone.";
+      res.render('ecommerce-otp-challenge', {
+        message: message,
+        //correlation: otp.correlation (not used by voice)
+      });
+      done = true;
+    }
+
   }
 
   if (!done) next(createError(403));
@@ -155,6 +171,16 @@ router.post('/otp', async (req, res, next) => {
 
       if (factor.type == "emailotp") {
         var otpresult = await adaptive.evaluateEmailOTP(context,
+          req.session.transactionId, req.body.otp);
+      }
+
+      if (factor.type == "smsotp") {
+        var otpresult = await adaptive.evaluateSMSOTP(context,
+          req.session.transactionId, req.body.otp);
+      }
+
+      if (factor.type == "voiceotp") {
+        var otpresult = await adaptive.evaluateVoiceOTP(context,
           req.session.transactionId, req.body.otp);
       }
 
