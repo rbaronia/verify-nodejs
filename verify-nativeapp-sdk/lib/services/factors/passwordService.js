@@ -28,15 +28,20 @@ const FactorService = require('../factors/factorService');
  */
 class PasswordService extends FactorService {
   /**
-   * Get identity source IDs for a username.
-   * @param {string} username The username to authenticate as.
-   * @return {Promise<Object>} The HTTP response body of the request.
+   * Get identity source ID for a sourceName.
+   * @param {string} sourceName The name of the Identity Source.
+   * @return {Promise<Object>} The array of sources returned.
    */
-  async lookupIdentitySources(username) {
-    const response = await this.post(
-        `/v1/mgmt/idaas/user/identitysources`,
-        {"user": username});
-    return response.data;
+  async lookupIdentitySources(sourceName) {
+    var response;
+    if (sourceName) {
+      response = await this.get(
+          '/v1.0/authnmethods/password?search=name = "' + sourceName + '"');
+    } else {
+      response = await this.get(
+          '/v1.0/authnmethods/password');
+    }
+    return response.data.password;
   }
 
   /**

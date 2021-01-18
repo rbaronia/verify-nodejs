@@ -388,7 +388,7 @@ class Adaptive {
    *   }
    * ]
    */
-  async lookupIdentitySources(context, transactionId, username) {
+  async lookupIdentitySources(context, transactionId, sourceName) {
     const transaction = this._transactionFunctions
         .getTransaction(transactionId);
 
@@ -396,10 +396,10 @@ class Adaptive {
         {accessToken: transaction.assessment.access_token},
         this._config.tenantUrl, context);
 
-    const sources = await passwordService.lookupIdentitySources(username);
+    const sources = await passwordService.lookupIdentitySources(sourceName);
 
     console.log(`[${Adaptive.name}:lookupIdentitySources(context, transactionId, ` +
-        `username)]`, 'sources:', sources);
+        `sourceName)]`, 'sources:', sources);
 
     return sources;
   }

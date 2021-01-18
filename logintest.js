@@ -53,11 +53,11 @@ async function main() {
     if (username) {
 
       // Lookup identity sources (and get the first).
-      // This function calls the /v1/mgmt/idaas/user/identitysources endpoint.
+      // This function calls the /v1.0/authmethods/password endpoint.
       // This call is NOT available in the published Adaptive SDK.
       var idSources = await adaptive.lookupIdentitySources(context,
         firstContact.transactionId,
-        username);
+        "Cloud Directory");
 
       // Perform password validation
       let result;

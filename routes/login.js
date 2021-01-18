@@ -110,10 +110,10 @@ router.post('/', async (req, res, next) => {
   let idSource;
 
   try {
-    // Lookup identity sources (and get the first)
+    // Lookup "Cloud Directory" identity source
     let idSources = await adaptive.lookupIdentitySources(context,
       req.session.transactionId,
-      req.body.j_username);
+      "Cloud Directory");
     idSource = idSources[0].id;
   } catch (error) {
     console.log(error);
