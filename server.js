@@ -29,6 +29,10 @@ app.set('view engine', 'hbs');
 // Define static resources
 app.use('/static', express.static(__dirname + '/static'));
 
+// Define resources required for adaptive access.  Read from browser SDK package.
+app.use('/static/adaptive-v1.js', express.static(__dirname + '/node_modules/adaptive-browser-sdk/dist/adaptive-v1.min.js'));
+app.use('/icons/blank.gif', express.static(__dirname + '/node_modules/adaptive-browser-sdk/blank.gif'));
+
 var login = require('./routes/login');
 var mfa = require('./routes/mfa');
 var register = require('./routes/register');

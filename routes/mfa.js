@@ -76,7 +76,7 @@ async function challengeMfa(req, res, next) {
   var factorLookup = req.session.factorLookup;
 
   var context = {
-    sessionId: "", // Empty value because not using Adaptive Access
+    sessionId: req.session.sessionId,
     userAgent: req.headers['user-agent'],
     ipAddress: req.ip
   }
@@ -156,7 +156,7 @@ router.post('/otp', async (req, res, next) => {
   if (!done) {
 
     var context = {
-      sessionId: "", // Empty value because not using Adaptive Access
+      sessionId: req.session.sessionId,
       userAgent: req.headers['user-agent'],
       ipAddress: req.ip
     }
