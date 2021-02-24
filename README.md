@@ -22,7 +22,7 @@ npm install
 # IBM Security Verify configuration
 Before you can use this application, you must configure your IBM Securiy Verify tenant to work with it.
 
-## Create a Navtive Web Policy
+## Create a Native Web Policy
 In IBM Security Verify, create a new "Native Web App" policy.  Initially, take all the defaults.
 - Later you can modify the requirements for first factor and multi-factor authentication.
 
@@ -66,8 +66,9 @@ APP_CLIENT_SECRET=xxxxxxxxxx
 CLIENT_ID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 CLIENT_SECRET=xxxxxxxxxx
 
-PASSWORD_IDENTITY_SOURCE_ID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 AUTHENTICATOR_PROFILEID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+
+ADAPTIVE_ENABLED=false
 
 SESSION_SECRET=somethinghardtoguess
 SCOPE=oidc
@@ -80,8 +81,8 @@ Parameter(s) | Location
 --- | ---
 APP_CLIENT_ID and APP_CLIENT_SECRET | In "Sign-on" tab of the application definition.
 CLIENT_ID and CLIENT_SECRET | In properties of the privileged client you created under "API access" tab of the application definition.
-PASSWORD_IDENTITY_SOURCE_ID | Under Configuration-->Identity Sources, select "Cloud Directory" and look for ID.
 AUTHENTICATOR_PROFILEID | Under Security-->Registration profiles, select and entry and copy the Profile ID from details pane.
+ADAPTIVE_ENABLED | Set to true to enable Adaptive Access functionality.  See below for additional pre-requisites.
 
 # Start the application
 Once you have completed the steps above, you can start the application with this command:
@@ -90,3 +91,28 @@ npm start
 ```
 
 You can connect to the application at http://localhost:3000
+
+# Adaptive access
+This application can be used to demonstrate Adaptive Access if this is available in your IBM Security Verify tenant.  Follow the steps below.
+
+## On-board your Application
+In the Application definition, go to the **Adaptive sign-on** tab and enter an *Allowed domain*.  You must access the application using a host within this domain in order for Adaptive Access to function correctly.  Set up an alias in your local /etc/hosts file if you don't have a real DNS host.
+
+Click **Generate**.  This starts the on-boarding process.  It can take some time (an hour or more) to complete.  You can leave the page and check back later.
+
+When the on-boarding is complete, the page will show a web snippet.  You will need to add this to the application login page.
+
+## Add web snippet to login page
+Open the *views/ecommerce-login.hbs* file.  In this file, locate the line:
+
+```
+  	<!-- Paste web snippet here for Adaptive -->
+```
+
+Paste the web snippet from the application definition into the page at this point.
+
+## Enable Adaptive function in .env file
+In the *.env* file, set `ADAPTIVE_ENABLED=true`.
+
+## Enable Adaptive Access in your Native Web App policy
+In the Native Web App policy that is associated with your application, enable Adaptive Access.  Initially at least you should set your post-authentication rules to allow access (so that only Adaptive Access is controlling the need for 2nd Factor Authentication).
