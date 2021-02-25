@@ -12,6 +12,27 @@
 
 	<title>Login - TrustMe Store</title>
 
+	{{#if adaptive}}
+  	<!-- Paste web snippet here for Adaptive -->
+
+  	<script>
+  		window.addEventListener('load', function (e) {
+    		var form = document.getElementsByName('login')[0];
+    		form.addEventListener('submit', function (event) {
+      		event.preventDefault();
+      		getSessionId().then(sessionID => {
+        		const sessionIDField = document.createElement('input');
+        		sessionIDField.type = 'hidden';
+        		sessionIDField.name = 'sessionId';
+        		sessionIDField.value = sessionID;
+        		form.appendChild(sessionIDField);
+        		form.submit();
+      		});
+    		});
+  		});
+		</script>
+	{{/if}}
+
 </head>
 
 <body class="sa_body">
@@ -36,7 +57,7 @@
 								<div class="sa_account-box-head">
 									<strong>Password Login</strong>
 								</div>
-								<form action="login" method="post">
+								<form name="login" action="login" method="post">
 									<div class="sa_formRow">
 										<label>Email</label>
 										<input name="j_username" id="form-username" class="sy-input--text-username" type="text" placeholder="Email" onFocus="this.placeholder = ''">

@@ -14,6 +14,7 @@ const appClientConfig = {
 };
 
 const mmfaProfile = process.env.AUTHENTICATOR_PROFILEID
+const adaptive_enabled = (process.env.ADAPTIVE_ENABLED == "true");
 
 const adaptive = new Adaptive(appClientConfig);
 const date = new Date();
@@ -65,7 +66,8 @@ router.get('/', async (req, res, next) => {
     }
 
     res.render('ecommerce-login', {
-      factors: factors
+      factors: factors,
+      adaptive: adaptive_enabled
     });
   }
 });
@@ -101,8 +103,14 @@ router.post('/', async (req, res, next) => {
 
   let done = false;
 
+  if (adaptive_enabled && req.body.sessionId) {
+    req.session.sessionId = req.body.sessionId;
+  } else {
+    req.session.sessionId = "";
+  }
+
   var context = {
-    sessionId: "", // Empty value because not using Adaptive Access
+    sessionId: req.session.sessionId,
     userAgent: req.headers['user-agent'],
     ipAddress: req.ip
   }
@@ -137,8 +145,14 @@ router.post('/', async (req, res, next) => {
         req.session.token.expirytime = date.getTime() + (result.token.expires_in * 1000);
       }
 
+      if (result && result.status == "deny") {
+        console.log("***DENIED***" + JSON.stringify(result));
+        next(createError(403));
+        done = true;
+      }
+
     } catch (error) {
-      next(createError(403))
+      next(createError(403));
       done = true;
     }
   }
