@@ -362,31 +362,29 @@ class Adaptive {
   }
 
   /**
-   * Lookup Identity Sources for user
+   * Lookup Identity Sources by name.  If name not defined then
+   * return all password-capable sources.
    *
    * @param {string} transactionId The identifier of the transaction received in
    * {@link Adaptive#assessPolicy}.
-   * @param {string} username The username to look up.
+   * @param {string} sourceName The source name to look up.
    * @return {Promise<Object>} The result object. The result
    * object contains an array of identity sources for this user.
-   * @example <caption><code>allow</code> result object</caption>
-   * [
-   *   {
-   *     "instanceName": "Cloud Directory",
-   *     "realm": "cloudIdentityRealm",
-   *     "id": "10a9bc20-1111-2222-3333-f6e18e31f978",
-   *     "providerType": "ibmldap",
-   *     "enabled": true,
-   *     "predefined": false,
-   *     "properties": [
-   *       {
-   *         "value": "https://xxxx.verify.ibm.com/idaas/mtfim/sps/idaas/login?identity_source_id=10a9bc20-1111-2222-3333-f6e18e31f978&login_type=local",
-   *         "key": "redirect_url"
-   *       }
-   *     ],
-   *     "status": "configured"
-   *   }
-   * ]
+   * @example <caption>Result object</caption>
+   * {
+   *   "total": 1,
+   *   "password": [
+   *     {
+   *       "name": "Cloud Directory",
+   *       "location": "https://<tenant_url>/v1.0/authnmethods/password/11111111-2222-3333-4444-555555555555",
+   *       "id": "11111111-2222-3333-4444-555555555555",
+   *       "type": "ibmldap"
+   *     }
+   *   ],
+   *   "limit": 200,
+   *   "count": 200,
+   *   "page": 1
+   * }
    */
   async lookupIdentitySources(context, transactionId, sourceName) {
     const transaction = this._transactionFunctions

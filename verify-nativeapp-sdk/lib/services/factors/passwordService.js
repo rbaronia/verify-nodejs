@@ -28,7 +28,8 @@ const FactorService = require('../factors/factorService');
  */
 class PasswordService extends FactorService {
   /**
-   * Get identity source ID for a sourceName.
+   * Lookup identity sources by sourceName (or all password-capable
+   * sources if sourceName not defined)
    * @param {string} sourceName The name of the Identity Source.
    * @return {Promise<Object>} The array of sources returned.
    */
