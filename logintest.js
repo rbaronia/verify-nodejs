@@ -2,9 +2,8 @@
  * Test application which exercises the PolicyAuth grant flow.
  */
 
-// Require the included (bespoke) Native App SDK library
-// This is an augmented version of the published Adaptive Proxy SDK
-const Adaptive = require('./verify-nativeapp-sdk').Adaptive;
+// Require the Adaptive Proxy SDK library
+const Adaptive = require('adaptive-proxy-sdk');
 
 // Require readline package (to get user input)
 const readline = require('readline');

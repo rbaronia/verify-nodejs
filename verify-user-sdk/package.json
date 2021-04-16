@@ -1,14 +1,14 @@
 {
-  "_from": "verify-nativeapp-sdk",
-  "_id": "verify-nativeapp-sdk@0.0.1",
+  "_from": "veify-user-sdk",
+  "_id": "veify-user-sdk@0.0.1",
   "_inBundle": false,
-  "_location": "/verify-nativeapp-sdk",
+  "_location": "/veify-user-sdk",
   "_phantomChildren": {},
   "_requested": {
     "type": "tag",
-    "raw": "verify-nativeapp-sdk",
-    "name": "verify-nativeapp-sdk",
-    "escapedName": "verify-nativeapp-sdk",
+    "raw": "veify-user-sdk",
+    "name": "veify-user-sdk",
+    "escapedName": "veify-user-sdk",
     "rawSpec": "",
     "saveSpec": null,
     "fetchSpec": "latest"
@@ -17,7 +17,7 @@
     "#USER",
     "/"
   ],
-  "_spec": "verify-nativeapp-sdk",
+  "_spec": "verify-user-sdk",
   "bundleDependencies": false,
   "dependencies": {
     "axios": "^0.19.2",
@@ -36,7 +36,7 @@
   "keywords": [],
   "license": "MIT",
   "main": "lib/index.js",
-  "name": "verify-nativeapp-sdk",
+  "name": "verify-user-sdk",
   "scripts": {
     "clean": "rm -r node_modules package-lock.json",
     "docs": "rm -r docs 2>/dev/null; jsdoc -r lib -d docs -t node_modules/minami",
