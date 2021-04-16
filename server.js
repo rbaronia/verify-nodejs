@@ -6,7 +6,7 @@ const session = require('express-session');
 const createError = require('http-errors');
 
 const OAuthClientCreds = require('./oauth-client-creds.js').OAuthClientCreds;
-const User = require('./verify-nativeapp-sdk/lib/index.js').User;
+const User = require('./verify-user-sdk/lib/index.js').User;
 
 const path = require('path');
 const app = express();
