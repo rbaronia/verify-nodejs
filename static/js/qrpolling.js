@@ -4,7 +4,7 @@ function processResponse() {
       var jsonResponse = JSON.parse(req.responseText);
       if(jsonResponse && jsonResponse.state != null) {
           var state = jsonResponse.state;
-          if (state != 'SUCCESS') {
+          if (state != 'DONE') {
             // re-poll after a short wait
             setTimeout(startPolling, 2000);
           } else {

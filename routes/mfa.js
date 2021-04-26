@@ -186,6 +186,7 @@ router.post('/otp', async (req, res, next) => {
 
       console.log("***OTPRESULT***: " + JSON.stringify(otpresult));
     } catch (error) {
+      console.log("***ERROR***: " + JSON.stringify(error));
       next(createError(403))
       done = true;
     }
