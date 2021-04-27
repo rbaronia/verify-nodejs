@@ -20,6 +20,7 @@ function getOtpLabel(item) {
   if (item.type == "emailotp") return "E-mail OTP";
   if (item.type == "smsotp") return "SMS OTP";
   if (item.type == "voiceotp") return "Voice OTP";
+  //if (item.type == "signature") return "Mobile push";
 }
 
 router.get('/', (req, res, next) => {
@@ -36,21 +37,38 @@ router.get('/', (req, res, next) => {
 
     console.log("***MFA***: " + JSON.stringify(result));
 
+    var push = {};
     var factors = [];
     var factorLookup = {};
     var factorsArray = result.enrolledFactors;
-    factorsArray.forEach((item, i) => {
+    factorsArray.forEach((item, _i) => {
       let label = getOtpLabel(item);
       if (item.enabled && label) {
-        factors.push({
-          type: item.type,
-          id: item.id,
-          label: label
-        });
-        factorLookup[item.id] = item;
+
+        if (item.subType) {
+          if (item.subType != "userPresence" || push == {})
+            push = item;
+        }
+
+        if (item.subType != "userPresence") {
+          factors.push({
+            type: item.type,
+            id: item.id,
+            label: label
+          });
+          factorLookup[item.id] = item;
+        }
       }
     });
-    console.log("***Factors***: " + JSON.stringify(factors));
+
+    if (push.subType == "userPresence") {
+      factors.push({
+        type: push.type,
+        id: push.id,
+        label: getOtpLabel(push)
+      });
+      factorLookup[item.id] = item;
+    }
 
     req.session.factorLookup = factorLookup;
 
@@ -138,6 +156,23 @@ async function challengeMfa(req, res, next) {
       done = true;
     }
 
+    if (factorLookup[req.body.factorid].type == "signature") {
+      req.session.factor = factorLookup[req.body.factorid];
+
+      var push = await adaptive.generatePush(
+                  context,
+                  req.session.transactionId,
+                  req.session.factor.id,
+                  req.session.factor.references.authenticatorId,
+                  "Please validate your login to TrustMe Store",
+                  "TrustMe Store",
+                  "Login validation required",
+                  []);
+      res.render('ecommerce-push-challenge', {
+        code: push.correlation
+      });
+      done = true;
+    }
   }
 
   if (!done) next(createError(403));
@@ -184,7 +219,6 @@ router.post('/otp', async (req, res, next) => {
           req.session.transactionId, req.body.otp);
       }
 
-      console.log("***OTPRESULT***: " + JSON.stringify(otpresult));
     } catch (error) {
       console.log("***ERROR***: " + JSON.stringify(error));
       next(createError(403))
@@ -203,12 +237,77 @@ router.post('/otp', async (req, res, next) => {
     // Calculated from current time and expires_in
     req.session.token.expirytime = date.getTime() + (otpresult.token.expires_in * 1000);
 
-    console.log("**SESSION**: " + JSON.stringify(req.session));
     res.redirect('/home');
     done = true;
   }
 
   if (!done) next(createError(403));
+});
+
+// Handle GET request for /userlogin/pushcheck
+// This endpoint is intended to be accessed by client-side JavaScript
+// on the page which polls to see if Moble PUSH auth has been completed
+router.get('/pushcheck', async function(req, res, _next) {
+
+  // Call Moble PUSH validation function.
+  // Pass in the transaction id
+
+  let result = undefined;
+
+  var context = {
+    sessionId: req.session.sessionId,
+    userAgent: req.headers['user-agent'],
+    ipAddress: req.ip
+  }
+
+  try {
+
+    result = await adaptive.evaluatePush(context, req.session.transactionId);
+    if (result && result.status != "pending") {
+      req.session.pushresult = result;
+      res.json({
+        "state": "DONE",
+        "next": "/mfa/pushdone"
+      });
+    } else {
+      res.json({
+        "state": "PENDING"
+      });
+    }
+  } catch (error) {
+    console.log(error);
+    res.json({
+      "state": "ERROR"
+    });
+  }
+});
+
+router.get('/pushdone', async (req, res, next) => {
+
+  if (!req.session.pushresult) {
+    next(createError(400));
+  } else {
+
+    var result = req.session.pushresult;
+    delete req.session.pushresult;
+
+    if (result && result.status == "allow") {
+      req.session.authenticated = true;
+      req.session.token = result.token;
+      delete req.session.factor;
+      delete req.session.factorLookup;
+      delete req.session.passresult;
+      delete req.session.transactionId;
+
+      // Add absolute expiry time to the token data
+      // Calculated from current time and expires_in
+      req.session.token.expirytime = date.getTime() + (result.token.expires_in * 1000);
+      res.redirect('/home');
+    } else {
+      console.log("**NOT ALLOW**:" + JSON.stringify(result))
+      next(createError(403));
+    }
+  }
 });
 
 module.exports = router;

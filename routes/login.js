@@ -207,7 +207,6 @@ router.get('/qrcheck', async function(req, res, _next) {
   }
 
   try {
-    var verifyClient = req.app.get('verifyClient');
     result = await adaptive.evaluateQR(context, req.session.transactionId);
     if (result && result.status != "pending") {
       req.session.qrresult = result;
@@ -229,8 +228,6 @@ router.get('/qrcheck', async function(req, res, _next) {
 });
 
 router.get('/qrlogin', async (req, res, next) => {
-
-  let done = false;
 
   if (!req.session.qrresult) {
     next(createError(400));
