@@ -166,7 +166,7 @@ class OAuthClientCreds {
         var stringToken = null
         try { //Attempt to read token data from file
           stringToken = fs.readFileSync(`access_token_${this.config.clientId}.json`)
-        } catch {}; //Do nothing on failure
+        } catch (error) {}; //Do nothing on failure
         // If a token was read from file
         if (stringToken) {
           console.log("Loaded token : " + stringToken);
