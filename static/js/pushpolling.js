@@ -25,7 +25,7 @@ function processResponse() {
  function startPolling() {
   req = new XMLHttpRequest();
   req.onreadystatechange = processResponse;
-  req.open("GET", "/login/qrcheck", true);
+  req.open("GET", "/mfa/pushcheck", true);
   req.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
   req.setRequestHeader("Accept", "application/json;charset=UTF-8");
   req.send();

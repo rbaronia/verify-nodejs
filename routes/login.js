@@ -58,7 +58,6 @@ router.get('/', async (req, res, next) => {
       try {
         var qrlogin = await adaptive.generateQR(context, req.session.transactionId, mmfaProfile);
         factors.qr.code = qrlogin.qr.code;
-        req.session.qrlogin = qrlogin;
       } catch (e) {
         next(createError(500));
         done = true;
@@ -184,21 +183,58 @@ router.post('/', async (req, res, next) => {
   if (!done) next();
 }, checkMfa);
 
-router.get('/qrlogin', async (req, res, next) => {
+// Handle GET request for /userlogin/qrcheck
+// This endpoint is intended to be accessed by client-side JavaScript
+// on the login page which polls to see if QRLogin has been completed
+router.get('/qrcheck', async function(req, res, _next) {
 
-  let done = false;
+  // Call QRLogin validation function.
+  // Pass in the response from initation which includes transaction id
+  // and DSI needed for the validation check.
+
+  let result = undefined;
+
+  if (adaptive_enabled && req.body.sessionId) {
+    req.session.sessionId = req.body.sessionId;
+  } else {
+    req.session.sessionId = "";
+  }
 
   var context = {
-    sessionId: "", // Empty value because not using Adaptive Access
+    sessionId: req.session.sessionId,
     userAgent: req.headers['user-agent'],
     ipAddress: req.ip
   }
 
-  result = undefined;
   try {
-    var verifyClient = req.app.get('verifyClient');
-    var token = await verifyClient.getAccessToken();
-    result = await adaptive.evaluateQR(context, req.session.transactionId, token.access_token);
+    result = await adaptive.evaluateQR(context, req.session.transactionId);
+    if (result && result.status != "pending") {
+      req.session.qrresult = result;
+      res.json({
+        "state": "DONE",
+        "next": "/login/qrlogin"
+      });
+    } else {
+      res.json({
+        "state": "PENDING"
+      });
+    }
+  } catch (error) {
+    console.log(error);
+    res.json({
+      "state": "ERROR"
+    });
+  }
+});
+
+router.get('/qrlogin', async (req, res, next) => {
+
+  if (!req.session.qrresult) {
+    next(createError(400));
+  } else {
+
+    var result = req.session.qrresult;
+    delete req.session.qrresult;
 
     if (result && result.status == "allow") {
       req.session.authenticated = true;
@@ -209,13 +245,6 @@ router.get('/qrlogin', async (req, res, next) => {
       req.session.token.expirytime = date.getTime() + (result.token.expires_in * 1000);
     }
 
-  } catch (error) {
-    console.log(error);
-    next(createError(403))
-    done = true;
-  }
-
-  if (!done) {
     req.session.passresult = result;
     next();
   }
@@ -239,57 +268,5 @@ function checkMfa(req, res, next) {
 
   if (!done) next(createError(403));
 }
-
-// Handle GET request for /userlogin/qrcheck
-// This endpoint is intended to be accessed by client-side JavaScript
-// on the login page which polls to see if QRLogin has been completed
-router.get('/qrcheck', async function(req, res, _next) {
-
-  // Call QRLogin validation function.
-  // Pass in the response from initation which includes transaction id
-  // and DSI needed for the validation check.
-
-  var verifyClient = req.app.get('verifyClient');
-
-  let path = `${process.env.TENANT_URL}/v2.0/factors/qr/authenticate/` +
-    req.session.qrlogin.qr.id +
-    "?dsi=" + req.session.qrlogin.qr.dsi
-
-  let options = {
-    notoken: true,
-    method: 'GET',
-    accept: 'application/json',
-    url: path
-  };
-
-  try {
-    result = await verifyClient.makeRequest(options);
-  } catch (err) {
-    console.log(err);
-    next(createError(500));
-    done = true;
-  }
-
-  if (result && result.state) {
-    // If state is "SUCCESS" it means QRLogin has completed
-    if (result.state == "SUCCESS") {
-
-      res.json({
-        "state": "SUCCESS",
-        "next": "/login/qrlogin"
-      });
-    } else { // state is not SUCCESS
-      // Return the state to the caller
-      res.json({
-        "state": result.state
-      });
-    }
-  } else { // bad response
-    // return error state to the caller
-    res.json({
-      "state": "error"
-    });
-  }
-});
 
 module.exports = router;
