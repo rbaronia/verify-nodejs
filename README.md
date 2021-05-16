@@ -12,7 +12,7 @@ If you have git installed you can clone this repository with the command:
 ```bash
 git clone https://github.com/iamexploring/verify-nodejs
 ```
-## Load download required node packages
+## Install required node packages
 Run the following commands to download the packages to the cloned application directory:
 ```bash
 cd verify-nodejs
