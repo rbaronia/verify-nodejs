@@ -37,7 +37,7 @@ router.get('/', (req, res, next) => {
 
     console.log("***MFA***: " + JSON.stringify(result));
 
-    var push = {};
+    var push = null;
     var factors = [];
     var factorLookup = {};
     var factorsArray = result.enrolledFactors;
@@ -46,7 +46,7 @@ router.get('/', (req, res, next) => {
       if (item.enabled && label) {
 
         if (item.subType) {
-          if (item.subType != "userPresence" || push == {})
+          if (item.subType != "userPresence" || push == null)
             push = item;
         }
 
@@ -60,14 +60,13 @@ router.get('/', (req, res, next) => {
         }
       }
     });
-
-    if (push.subType == "userPresence") {
+    if (push && push.subType == "userPresence") {
       factors.push({
         type: push.type,
         id: push.id,
         label: getOtpLabel(push)
       });
-      factorLookup[item.id] = item;
+      factorLookup[push.id] = push;
     }
 
     req.session.factorLookup = factorLookup;
