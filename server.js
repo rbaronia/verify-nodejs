@@ -17,6 +17,9 @@ app.use(bodyParser.urlencoded({
   extended: false
 }));
 
+// load contents of .env into process.env
+require('dotenv').config();
+
 app.use(session({
   secret: process.env.SESSION_SECRET,
   resave: false,
@@ -42,9 +45,6 @@ app.use('/login', login);
 app.use('/mfa', mfa);
 app.use('/register', register);
 app.use('/myaccount', myaccount);
-
-// load contents of .env into process.env
-require('dotenv').config();
 
 const clientAuthConfig = {
   tenantUrl: process.env.TENANT_URL,
