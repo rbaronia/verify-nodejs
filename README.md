@@ -1,5 +1,7 @@
 # Introduction
-This repository holds a demonstration consumer application which uses IBM Security Verify to provide registration, policy-based authentication (first-factor and optional multi-factor), and account management.  It uses native APIs for all functionality.
+This repository holds a demonstration consumer application which uses IBM Security Verify to provide registration, policy-based authentication (first-factor and optional multi-factor), and account management.  It uses the IBM Security Verify Adaptive SDK for all functionality.
+
+A cookbook which uses this application, with step-by-step setup instructions and exploration of the associated REST APIs using Postman, is available on IBM Security Learning Academy.  [Access the cookbook here](https://www.securitylearningacademy.com/course/view.php?id=6114) (IBMid login required).
 
 # Installation
 Follow these steps to install the application on your system.
