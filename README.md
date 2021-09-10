@@ -116,5 +116,8 @@ Paste the web snippet from the application definition into the page at this poin
 ## Enable Adaptive function in .env file
 In the *.env* file, set `ADAPTIVE_ENABLED=true`.
 
+## Override local IP address if connecting locally
+If you will connect to the demo application from the local machine you must provide your internet IP address so that this can override the local address that will otherwise be reported.  In the *.env* file, set `ADAPTIVE_OVERRIDE_IP=x.x.x.x` where `x.x.x.x` is your internet IP address.  To determine this address, you can use a service such as https://www.whatismyip.com/.
+
 ## Enable Adaptive Access in your Native Web App policy
 In the Native Web App policy that is associated with your application, enable Adaptive Access.  Initially at least you should set your post-authentication rules to allow access (so that only Adaptive Access is controlling the need for 2nd Factor Authentication).

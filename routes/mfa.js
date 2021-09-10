@@ -92,10 +92,15 @@ async function challengeMfa(req, res, next) {
   var done = false;
   var factorLookup = req.session.factorLookup;
 
+  var ip = req.ip;
+  if (process.env.ADAPTIVE_OVERRIDE_IP) {
+    ip = process.env.ADAPTIVE_OVERRIDE_IP;
+  }
+
   var context = {
     sessionId: req.session.sessionId,
     userAgent: req.headers['user-agent'],
-    ipAddress: req.ip
+    ipAddress: ip
   }
 
   if (!factorLookup) {
@@ -189,10 +194,15 @@ router.post('/otp', async (req, res, next) => {
 
   if (!done) {
 
+    var ip = req.ip;
+    if (process.env.ADAPTIVE_OVERRIDE_IP) {
+      ip = process.env.ADAPTIVE_OVERRIDE_IP;
+    }
+
     var context = {
       sessionId: req.session.sessionId,
       userAgent: req.headers['user-agent'],
-      ipAddress: req.ip
+      ipAddress: ip
     }
 
     var otpresult = undefined;
@@ -253,10 +263,15 @@ router.get('/pushcheck', async function(req, res, _next) {
 
   let result = undefined;
 
+  var ip = req.ip;
+  if (process.env.ADAPTIVE_OVERRIDE_IP) {
+    ip = process.env.ADAPTIVE_OVERRIDE_IP;
+  }
+
   var context = {
     sessionId: req.session.sessionId,
     userAgent: req.headers['user-agent'],
-    ipAddress: req.ip
+    ipAddress: ip
   }
 
   try {

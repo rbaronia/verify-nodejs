@@ -24,10 +24,15 @@ router.get('/', async (req, res, next) => {
   var done = false;
   var result = undefined;
 
+  var ip = req.ip;
+  if (process.env.ADAPTIVE_OVERRIDE_IP) {
+    ip = process.env.ADAPTIVE_OVERRIDE_IP;
+  }
+
   var context = {
     sessionId: "", // Empty value because not using Adaptive Access
     userAgent: req.headers['user-agent'],
-    ipAddress: req.ip
+    ipAddress: ip
   }
 
   try {
@@ -108,10 +113,15 @@ router.post('/', async (req, res, next) => {
     req.session.sessionId = "";
   }
 
+  var ip = req.ip;
+  if (process.env.ADAPTIVE_OVERRIDE_IP) {
+    ip = process.env.ADAPTIVE_OVERRIDE_IP;
+  }
+
   var context = {
     sessionId: req.session.sessionId,
     userAgent: req.headers['user-agent'],
-    ipAddress: req.ip
+    ipAddress: ip
   }
 
   let idSource;
@@ -200,10 +210,15 @@ router.get('/qrcheck', async function(req, res, _next) {
     req.session.sessionId = "";
   }
 
+  var ip = req.ip;
+  if (process.env.ADAPTIVE_OVERRIDE_IP) {
+    ip = process.env.ADAPTIVE_OVERRIDE_IP;
+  }
+
   var context = {
     sessionId: req.session.sessionId,
     userAgent: req.headers['user-agent'],
-    ipAddress: req.ip
+    ipAddress: ip
   }
 
   try {
