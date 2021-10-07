@@ -3,3 +3,5 @@ node_modules
 access_token*
 test.js
 .DS_Store
+*.pem
+env.*
