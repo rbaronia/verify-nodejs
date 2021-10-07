@@ -148,10 +148,14 @@ app.post('/search', (req, res) => {
 
 // delete token from storage
 app.get('/logout', (req, res) => {
-  // get id from cookie
   delete req.session.authenticated;
   delete req.session.token;
   delete req.session.user;
+  delete req.session.factor;
+  delete req.session.transactionId;
+  delete req.session.factorLookup;
+  delete req.session.sessionId;
+  console.log(JSON.stringify(req.session));
   res.redirect('/');
 });
 

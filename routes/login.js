@@ -68,6 +68,8 @@ router.get('/', async (req, res, next) => {
       }
     }
 
+    delete req.session.factor;
+
     res.render('ecommerce-login', {
       factors: factors,
       adaptive: adaptive_enabled

@@ -95,7 +95,10 @@ router.get('/assertion/options', async (req, res, _next) => {
       ipAddress: ip
     }
 
-    let response = await adaptive.generateFIDO(context,req.session.transactionId, rp.id);
+    let user;
+    if (req.session.factor) user = req.session.factor.userId;
+
+    let response = await adaptive.generateFIDO(context,req.session.transactionId, rp.id, user);
     if (response) {
       res.json(response.fido);
       return;
