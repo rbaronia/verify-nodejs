@@ -43,11 +43,13 @@ var login = require('./routes/login');
 var mfa = require('./routes/mfa');
 var register = require('./routes/register');
 var myaccount = require('./routes/myaccount');
+var fido = require('./routes/fido');
 
 app.use('/login', login);
 app.use('/mfa', mfa);
 app.use('/register', register);
 app.use('/myaccount', myaccount);
+app.use('/fido', fido);
 
 const clientAuthConfig = {
   tenantUrl: process.env.TENANT_URL,
@@ -59,6 +61,16 @@ var clientOauthClient;
 if (clientAuthConfig.clientId) {
   const clientOauthClient = new OAuthClientCreds(clientAuthConfig);
   app.set('verifyClient', clientOauthClient);
+}
+
+const adaptiveConfig = {
+  tenantUrl: process.env.TENANT_URL,
+  clientId: process.env.APP_CLIENT_ID,
+  clientSecret: process.env.APP_CLIENT_SECRET,
+};
+if(adaptiveConfig.clientId) {
+  const adaptive = new Adaptive(adaptiveConfig);
+  app.set('adaptiveClient', adaptive);
 }
 
 const mustBeAuthenticated = (req, res, next) => {
@@ -84,7 +96,7 @@ app.get('/home', mustBeAuthenticated, (req, res) => {
 app.get('/cart', mustBeAuthenticated, async (req, res) => {
   let scim;
   if (!req.session.user) {
-    let user = new User(clientAuthConfig,req.session.token.access_token);
+    let user = new User(clientAuthConfig,{accessToken: req.session.token.access_token});
     scim = await user.getUser();
     req.session.user = scim;
   } else {
@@ -106,7 +118,7 @@ app.get('/success', mustBeAuthenticated, (req, res) => {
 });
 
 app.post('/checkout', mustBeAuthenticated, async (req, res) => {
-  let user = new User(clientAuthConfig,req.session.token.access_token);
+  let user = new User(clientAuthConfig,{accessToken: req.session.token.access_token});
   let currentUser = req.session.user;
 
   if (req.body.storemobile == "on") {

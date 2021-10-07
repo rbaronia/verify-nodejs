@@ -21,7 +21,7 @@ const mustBeAuthenticated = (req, res, next) => {
 router.get('/', mustBeAuthenticated, async (req, res, _next) => {
   let scim;
   if (!req.session.user) {
-    let user = new User(userClientConfig,req.session.token.access_token);
+    let user = new User(userClientConfig,{accessToken: req.session.token.access_token});
     scim = await user.getUser();
     req.session.user = scim;
   } else {
@@ -32,7 +32,7 @@ router.get('/', mustBeAuthenticated, async (req, res, _next) => {
 });
 
 router.post('/', mustBeAuthenticated, async (req, res, _next) => {
-  let user = new User(userClientConfig,req.session.token.access_token);
+  let user = new User(userClientConfig,{accessToken: req.session.token.access_token});
   let currentUser = req.session.user;
 
   currentUser.name.givenName = req.body.firstname;

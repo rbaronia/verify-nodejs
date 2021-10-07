@@ -1,6 +1,5 @@
 const express = require('express');
 const router = express.Router();
-const Adaptive = require('adaptive-proxy-sdk');
 const User = require('../verify-user-sdk/lib/index.js').User;
 const createError = require('http-errors');
 
@@ -16,13 +15,13 @@ const appClientConfig = {
 const mmfaProfile = process.env.AUTHENTICATOR_PROFILEID
 const adaptive_enabled = (process.env.ADAPTIVE_ENABLED == "true");
 
-const adaptive = new Adaptive(appClientConfig);
 const date = new Date();
 
 router.get('/', async (req, res, next) => {
 
   var done = false;
   var result = undefined;
+  let adaptive = req.app.get('adaptiveClient');
 
   var ip = req.ip;
   if (process.env.ADAPTIVE_OVERRIDE_IP) {
@@ -53,7 +52,7 @@ router.get('/', async (req, res, next) => {
 
     var factors = {};
     var factorsArray = result.allowedFactors;
-    factorsArray.forEach((item, i) => {
+    factorsArray.forEach((item, _i) => {
       factors[item.type] = {
         enabled: true
       };
@@ -90,7 +89,7 @@ router.post('/newpwd', async (req, res, next) => {
     let pwd = req.session.pwd;
     delete req.session.pwd;
     try {
-      let user = new User(appClientConfig, req.session.scimToken);
+      let user = new User(appClientConfig, {accessToken: req.session.scimToken});
       result = await user.updateUserPassword(pwd, req.body.newpwd1);
       delete req.session.scimToken;
       next()
@@ -106,6 +105,7 @@ router.post('/newpwd', async (req, res, next) => {
 router.post('/', async (req, res, next) => {
 
   let done = false;
+  let adaptive = req.app.get('adaptiveClient');
 
   if (adaptive_enabled && req.body.sessionId) {
     req.session.sessionId = req.body.sessionId;
@@ -175,7 +175,7 @@ router.post('/', async (req, res, next) => {
     }
     let scim;
     if (!req.session.user) {
-      let user = new User(appClientConfig, req.session.scimToken);
+      let user = new User(appClientConfig, {accessToken: req.session.scimToken});
       scim = await user.getUser();
       req.session.user = scim;
     } else {
@@ -203,9 +203,10 @@ router.get('/qrcheck', async function(req, res, _next) {
   // and DSI needed for the validation check.
 
   let result = undefined;
+  let adaptive = req.app.get('adaptiveClient');
 
-  if (adaptive_enabled && req.body.sessionId) {
-    req.session.sessionId = req.body.sessionId;
+  if (adaptive_enabled && req.query.sess) {
+    req.session.sessionId = req.query.sess;
   } else {
     req.session.sessionId = "";
   }
@@ -224,10 +225,9 @@ router.get('/qrcheck', async function(req, res, _next) {
   try {
     result = await adaptive.evaluateQR(context, req.session.transactionId);
     if (result && result.status != "pending") {
-      req.session.qrresult = result;
+      req.session.loginresult = result;
       res.json({
-        "state": "DONE",
-        "next": "/login/qrlogin"
+        "state": "DONE"
       });
     } else {
       res.json({
@@ -242,14 +242,14 @@ router.get('/qrcheck', async function(req, res, _next) {
   }
 });
 
-router.get('/qrlogin', async (req, res, next) => {
+router.get('/logindone', async (req, res, next) => {
 
-  if (!req.session.qrresult) {
+  if (!req.session.loginresult) {
     next(createError(400));
   } else {
 
-    var result = req.session.qrresult;
-    delete req.session.qrresult;
+    var result = req.session.loginresult;
+    delete req.session.loginresult;
 
     if (result && result.status == "allow") {
       req.session.authenticated = true;

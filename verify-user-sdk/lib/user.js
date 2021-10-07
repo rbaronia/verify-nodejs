@@ -20,9 +20,11 @@
 
 const ConfigurationError = require('./errors/configurationError');
 const ScimService = require('./services/users/scimService');
+const MfaRegService = require('./services/users/MfaRegService');
 
 /**
- * Class representing the User SDK. Used to perform SCIM operations.
+ * Class representing the User SDK. Used to perform SCIM operations
+ * and other operations in the context of the user.
  * @author Jon Harry <jonharry@uk.ibm.com>
  */
 class User {
@@ -30,98 +32,148 @@ class User {
    * Create a new {@link User} object.
    * @param {Object} config The configuration settings used for requests.
    * @param {string} config.tenantUrl The URL of the tenant.
-  * @param {string} token The Access Token for accessing SCIM endpoints.
+   * @param {string} auth The credentials for authentication.
    * @throws {ConfigurationError} The configuration object doesn't contain the
    * required properties.
    */
-  constructor(config,token,options) {
+  constructor(config, auth, options) {
     if (!config.tenantUrl) {
       throw new ConfigurationError(
-          `Cannot find property 'tenantUrl' in configuration settings.`);
+        `Cannot find property 'tenantUrl' in configuration settings.`);
     }
 
     this._config = config;
 
-   if (!token) {
-     throw new ConfigurationError(
-       `Cannot find token parameter.`);
-   }
+    if (!auth) {
+      throw new ConfigurationError(
+        `Cannot find auth parameter.`);
+    }
 
-   this._token = token;
-   this._options = options;
+    this._auth = auth;
+    this._options = options;
 
-    console.log(`[${User.name}:constructor(config, token, options)]`,
-        'tenantUrl:', this._config.tenantUrl);
-    console.log(`[${User.name}:constructor(config, token, options)]`,
-        'token:', '****');
-    console.log(`[${User.name}:constructor(config, token, options)]`,
-        'options:', JSON.stringify(options));
+    console.log(`[${User.name}:constructor(config, auth, options)]`,
+      'tenantUrl:', this._config.tenantUrl);
+    console.log(`[${User.name}:constructor(config, auth, options)]`,
+      'auth:', '****');
+    console.log(`[${User.name}:constructor(config, auth, options)]`,
+      'options:', JSON.stringify(options));
   }
 
-/**
- * Get SCIM for user associated with Access Token.
- * @return {object} SCIM object for the user
- */
-async getUser() {
+  /**
+   * Get SCIM for user associated with Access Token.
+   * @return {object} SCIM object for the user
+   */
+  async getUser() {
 
-  const scimService = new ScimService(
-      {accessToken: this._token},
-        this._config.tenantUrl);
+    const scimService = new ScimService(
+      this._auth,
+      this._config.tenantUrl);
 
-  const user = await scimService.getUser();
-  console.log(`[${User.name}:getUser()]`, 'user:', user);
+    const user = await scimService.getUser();
+    console.log(`[${User.name}:getUser()]`, 'user:', user);
 
-  return user;
-}
-
-/**
- * Update SCIM for user associated with Access Token.
- * @return {object} SCIM object for the user
- */
-async updateUser(scim) {
-
-  const scimService = new ScimService(
-      {accessToken: this._token},
-        this._config.tenantUrl);
-
-  const user = await scimService.updateUser(scim);
-  console.log(`[${User.name}:updateUser()]`, 'user:', user);
-
-  return user;
-}
-
-/**
- * Update password for user associated with Access Token.
- * @param {string} currentPwd The current password of the user.
- * @param {string} newPwd The new password for the user.
- * @return {object} Response from password change operation.
- */
-async updateUserPassword(currentPwd, newPwd, notifyOptions = {}) {
-
- const scimService = new ScimService(
-      {accessToken: this._token},
-        this._config.tenantUrl);
-
-  var data = {
-    "newPassword": newPwd,
-    "currentPassword": currentPwd,
-    "schemas": [
-      "urn:ietf:params:scim:schemas:ibm:core:2.0:ChangePassword",
-      "urn:ietf:params:scim:schemas:extension:ibm:2.0:Notification"
-    ]
+    return user;
   }
 
-  if (!notifyOptions.notifyType) notifyOptions.notifyType = "NONE";
-  if (!notifyOptions.notifyPassword) notifyOptions.notifyPassword = false;
-  if (!notifyOptions.notifyManager) notifyOptions.notifyManager = false;
+  /**
+   * Update SCIM for user associated with Access Token.
+   * @return {object} SCIM object for the user
+   */
+  async updateUser(scim) {
 
-  data["urn:ietf:params:scim:schemas:extension:ibm:2.0:Notification"] = notifyOptions;
+    const scimService = new ScimService(
+      this._auth,
+      this._config.tenantUrl);
 
-  const response = await scimService.updateUserPassword(data);
-  console.log(`[${User.name}:updateUserPassword(currentPwd, newPwd)]`, 'response:', response);
+    const user = await scimService.updateUser(scim);
+    console.log(`[${User.name}:updateUser()]`, 'user:', user);
 
-  return response;
-}
+    return user;
+  }
+
+  /**
+   * Update password for user associated with Access Token.
+   * @param {string} currentPwd The current password of the user.
+   * @param {string} newPwd The new password for the user.
+   * @return {object} Response from password change operation.
+   */
+  async updateUserPassword(currentPwd, newPwd, notifyOptions = {}) {
+
+    const scimService = new ScimService(
+      this._auth,
+      this._config.tenantUrl);
+
+    var data = {
+      "newPassword": newPwd,
+      "currentPassword": currentPwd,
+      "schemas": [
+        "urn:ietf:params:scim:schemas:ibm:core:2.0:ChangePassword",
+        "urn:ietf:params:scim:schemas:extension:ibm:2.0:Notification"
+      ]
+    }
+
+    if (!notifyOptions.notifyType) notifyOptions.notifyType = "NONE";
+    if (!notifyOptions.notifyPassword) notifyOptions.notifyPassword = false;
+    if (!notifyOptions.notifyManager) notifyOptions.notifyManager = false;
+
+    data["urn:ietf:params:scim:schemas:extension:ibm:2.0:Notification"] = notifyOptions;
+
+    const response = await scimService.updateUserPassword(data);
+    console.log(`[${User.name}:updateUserPassword(currentPwd, newPwd)]`, 'response:', response);
+
+    return response;
+  }
+
+  /**
+   * Get FIDO2 relying parties.
+   * @param {string} origin The current password of the user.
+   * @return {[object]} An array of relying parties for the origin.
+   */
+  async getFidoRelyingParties(origin) {
+    const mfaRegService = new MfaRegService(
+      this._auth,
+      this._config.tenantUrl);
+
+    let response = await mfaRegService.getFidoRelyingParties(origin);
+    console.log(`[${User.name}:getFidoRelyingParties(origin)]`, 'response:', response);
+
+    return response;
+  }
+
+  /**
+   * Get FIDO2 registration options
+   * @param {object} fidoRP Relying Party from {@link getFidoRelyingPartyies}
+   * @param {string} displayName display name to use for registration.
+   * @return {object} data needed to initiate FIDO2 registration
+   */
+  async getFidoRegistration(fidoRP,displayName) {
+    const mfaRegService = new MfaRegService(
+      this._auth,
+      this._config.tenantUrl);
+
+    let response = await mfaRegService.getFidoAttestationOptions(fidoRP,displayName);
+    console.log(`[${User.name}:getFidoRegistration(fidoRP,displayName)]`, 'response:', response);
+
+    return response;
+  }
+
+  /**
+   * Process FIDO2 registration response
+   * @param {object} fidoRP Relying Party from {@link getFidoRelyingPartyies}
+   * @param {object} data Response data from WebAuthn API.
+   * @return {object} Registration result
+   */
+  async processFidoRegistration(fidoRP,data) {
+    const mfaRegService = new MfaRegService(
+      this._auth,
+      this._config.tenantUrl);
+
+    let response = await mfaRegService.processFidoAttestationResult(fidoRP, data);
+    console.log(`[${User.name}:processFidoRegistration(fidoRP,data)]`, 'response:', response);
+
+    return response;
+  }
 
 }
 
