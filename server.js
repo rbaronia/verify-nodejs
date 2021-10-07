@@ -1,10 +1,13 @@
 const express = require('express');
+const https = require('https');
+const fs = require('fs');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser'); // optional
 //const uuidv1 = require('uuid/v1'); // optional
 const session = require('express-session');
 const createError = require('http-errors');
 
+const Adaptive = require('adaptive-proxy-sdk');
 const OAuthClientCreds = require('./oauth-client-creds.js').OAuthClientCreds;
 const User = require('./verify-user-sdk/lib/index.js').User;
 
@@ -165,6 +168,18 @@ app.use(function(err, req, res, _next) {
   res.render('ecommerce-error');
 });
 
-app.listen(3000, () => {
-  console.log('Server started on port 3000');
-});
+// Listen for requests.  HTTPS is needed for FIDO2.
+// Generate keys using create-crypto.sh
+if (process.env.FIDO2_ORIGIN) {
+	https.createServer({
+	    key: fs.readFileSync('./local.iamlab.key.pem'),
+	    cert: fs.readFileSync('./local.iamlab.cert.pem')
+	}, app)
+	.listen(3443, function() {
+	  	console.log('Your SSL app is listening on port 3443');
+	});
+} else {
+	const listener = app.listen(3000, function() {
+	  	console.log('Your app is listening on port ' + listener.address().port);
+	});
+}
