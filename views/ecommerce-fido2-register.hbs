@@ -84,7 +84,15 @@
         <!--section-account-details-->
         <div class="sa_section-account-details">
           <div>
-            <button onclick="fidoRegister()" id="createSubmit" class="sa_cta-btn sa_large-center">Register Authenticator</button>
+            <button onclick="fidoRegister()" id="register-button" class="sa_cta-btn sa_large-center">Start Registration</button>
+          </div>
+          <div id="name-input" class="sa_formRow" style="display: none;">
+            <label>Authenticator name</label>
+            <input name="authName" id="authName" class="sy-input--text-username" type="text" value="My FIDO Authenticator" autocomplete="off">
+            <div class="inputLine"></div>
+          </div>
+          <div>
+            <button style="display: none;" onclick="handleCreateResult()" id="name-button" class="sa_cta-btn sa_large-center">Register Authenticator</button>
           </div>
         </div>
         <!--section-account-details-->
