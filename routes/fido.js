@@ -25,11 +25,12 @@ router.get('/register', mustBeAuthenticated, async (_req, res, _next) => {
       res.render('ecommerce-fido2-register');
 });
 
-router.get('/attestation/options', mustBeAuthenticated, async (_req, res, _next) => {
+router.get('/attestation/options', mustBeAuthenticated, async (req, res, _next) => {
 
   let rpUuid = process.env.FIDO2_RP_UUID;
 
   if (rpUuid) {
+    let user = new User(appClientConfig,{accessToken: req.session.token.access_token});
     let fidoOptions = await user.getFidoRegistration(rpUuid, null);
     if (fidoOptions) {
       res.json(fidoOptions);
