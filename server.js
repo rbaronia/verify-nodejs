@@ -186,7 +186,7 @@ app.use(function(err, req, res, _next) {
 
 // Listen for requests.  HTTPS is needed for FIDO2.
 // Generate keys using create-crypto.sh
-if (process.env.FIDO2_ORIGIN) {
+if (process.env.FIDO2_RP_UUID) {
 	https.createServer({
 	    key: fs.readFileSync('./local.iamlab.key.pem'),
 	    cert: fs.readFileSync('./local.iamlab.cert.pem')

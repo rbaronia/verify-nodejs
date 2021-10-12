@@ -39,26 +39,14 @@ class MfaRegistrationService extends Service {
   }
 
   /**
-   * Get the FIDO2 relying parties for an origin
-   * @param {string} origin The origin for the Relying Party - a URL
-   * @return {Promise<Object>} The HTTP response body containing SCIM response.
-   * @throws {Error} An error response is received.
-   */
-  async getFidoRelyingParties(origin) {
-    let data = {"origin": origin};
-    const response = await this.post('/v2.0/factors/fido2/relyingparties',data);
-    return response.data.fido2;
-  }
-
-  /**
    * Get FIDO2 attestation options
-   * @param {object} fidoRP FIDO RP object from {@link getFidoRelyingParties}
+   * @param {string} fidoRpUuid FIDO Relying Party ID
    * @param {string} displayName The display name to use for registration.
    * @return {Promise<Object>} Attestation options
    * @throws {Error} An error response is received.
    */
-  async getFidoAttestationOptions(fidoRP, displayName) {
-    if (fidoRP && fidoRP.id) {
+  async getFidoAttestationOptions(fidoRpUuid, displayName) {
+    if (fidoRpUuid) {
       let data = {
         authenticatorSelection: {
           requireResidentKey: true,
@@ -70,22 +58,29 @@ class MfaRegistrationService extends Service {
       if (displayName) {
         data.displayName = displayName;
       }
-
-      const response = await this.post(fidoRP.attestationOptionsPath,data);
+      let optionsUrl = "/v2.0/factors/fido2/relyingparties/"
+                     + fidoRpUuid
+                     + "/attestation/options";
+      const response = await this.post(optionsUrl,data);
       return response.data;
+    } else {
+      throw "Missing input parameters."
     }
   }
 
   /**
    * Process attestation result
-   * @param {object} fidoRP FIDO RP object from {@link getFidoRelyingParties}
+   * @param {string} fidoRpUuid FIDO Relying Party UUID
    * @param {object} data The data returned from WebAuthn call.
    * @return {Promise<Object>} Registration result
    * @throws {Error} An error response is received.
    */
-  async processFidoAttestationResult(fidoRP, data) {
-    if (fidoRP && fidoRP.id && data) {
-      const response = await this.post(fidoRP.attestationResultPath,data);
+  async processFidoAttestationResult(fidoRpUuid, data) {
+    if (fidoRpUuid) {
+      let resultUrl = "/v2.0/factors/fido2/relyingparties/"
+                    + fidoRpUuid
+                    + "/attestation/result";
+      const response = await this.post(resultUrl,data);
       return response.data;
     } else {
       throw "Missing input parameters."

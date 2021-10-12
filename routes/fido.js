@@ -25,21 +25,12 @@ router.get('/register', mustBeAuthenticated, async (_req, res, _next) => {
       res.render('ecommerce-fido2-register');
 });
 
-router.get('/attestation/options', mustBeAuthenticated, async (req, res, _next) => {
+router.get('/attestation/options', mustBeAuthenticated, async (_req, res, _next) => {
 
-  let rp = req.app.get('fidorp');
-  let user = new User(appClientConfig,{accessToken: req.session.token.access_token});
+  let rpUuid = process.env.FIDO2_RP_UUID;
 
-  if (!rp) {
-    let rps = await user.getFidoRelyingParties(process.env.FIDO2_ORIGIN);
-    if (rps) {
-      rp = rps[0];
-      req.app.set('fidorp',rp);
-    }
-  }
-
-  if (rp) {
-    let fidoOptions = await user.getFidoRegistration(rp, null);
+  if (rpUuid) {
+    let fidoOptions = await user.getFidoRegistration(rpUuid, null);
     if (fidoOptions) {
       res.json(fidoOptions);
       return;
@@ -53,12 +44,12 @@ router.get('/attestation/options', mustBeAuthenticated, async (req, res, _next) 
 router.post('/attestation/result', mustBeAuthenticated, async (req, res, _next) => {
 
   let data = req.body;
-  let rp = req.app.get('fidorp');
+  let rpUuid = process.env.FIDO2_RP_UUID;
 
-  if (data && rp) {
+  if (data && rpUuid) {
     data.enabled = true;
     let user = new User(appClientConfig,{accessToken: req.session.token.access_token});
-    let result = await user.processFidoRegistration(rp,data);
+    let result = await user.processFidoRegistration(rpUuid,data);
 
     if (result) {
       res.json({success: true})
@@ -72,17 +63,9 @@ router.post('/attestation/result', mustBeAuthenticated, async (req, res, _next) 
 router.get('/assertion/options', async (req, res, _next) => {
 
   let adaptive = req.app.get('adaptiveClient');
-  let rp = req.app.get('fidorp');
+  let rpUuid = process.env.FIDO2_RP_UUID;
 
-  if (!rp) {
-    let rps = await adaptive.getFidoRelyingParties(req.session.transactionId, process.env.FIDO2_ORIGIN);
-    if (rps) {
-      rp = rps[0];
-      req.app.set('fidorp',rp);
-    }
-  }
-
-  if (rp) {
+  if (rpUuid) {
 
     var ip = req.ip;
     if (process.env.ADAPTIVE_OVERRIDE_IP) {
@@ -98,7 +81,7 @@ router.get('/assertion/options', async (req, res, _next) => {
     let user;
     if (req.session.factor) user = req.session.factor.userId;
 
-    let response = await adaptive.generateFIDO(context,req.session.transactionId, rp.id, user);
+    let response = await adaptive.generateFIDO(context,req.session.transactionId, rpUuid, user);
     if (response) {
       res.json(response.fido);
       return;
@@ -131,11 +114,22 @@ router.post('/assertion/result', async (req, res, _next) => {
   }
 
   let data = req.body;
-  let rp = req.app.get('fidorp');
+  let rpUuid = process.env.FIDO2_RP_UUID;
 
-  if (data && rp) {
-
-    result = await adaptive.evaluateFIDO(context, req.session.transactionId, data)
+  if (data && rpUuid) {
+    let authenticatorData = data.response.authenticatorData;
+    let userHandle = data.response.userHandle
+    let signature = data.response.signature
+    let clientDataJSON = data.response.clientDataJSON;
+    let credentialId = data.id;
+    result = await adaptive.evaluateFIDO(context,
+                req.session.transactionId,
+                rpUuid,
+                authenticatorData,
+                userHandle,
+                signature,
+                clientDataJSON,
+                credentialId)
 
     if (result) {
       req.session.loginresult = result;

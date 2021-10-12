@@ -126,51 +126,35 @@ class User {
   }
 
   /**
-   * Get FIDO2 relying parties.
-   * @param {string} origin The current password of the user.
-   * @return {[object]} An array of relying parties for the origin.
-   */
-  async getFidoRelyingParties(origin) {
-    const mfaRegService = new MfaRegService(
-      this._auth,
-      this._config.tenantUrl);
-
-    let response = await mfaRegService.getFidoRelyingParties(origin);
-    console.log(`[${User.name}:getFidoRelyingParties(origin)]`, 'response:', response);
-
-    return response;
-  }
-
-  /**
    * Get FIDO2 registration options
-   * @param {object} fidoRP Relying Party from {@link getFidoRelyingPartyies}
+   * @param {string} fidoRpUuid UUID of Relying Party
    * @param {string} displayName display name to use for registration.
    * @return {object} data needed to initiate FIDO2 registration
    */
-  async getFidoRegistration(fidoRP,displayName) {
+  async getFidoRegistration(fidoRpUuid,displayName) {
     const mfaRegService = new MfaRegService(
       this._auth,
       this._config.tenantUrl);
 
-    let response = await mfaRegService.getFidoAttestationOptions(fidoRP,displayName);
-    console.log(`[${User.name}:getFidoRegistration(fidoRP,displayName)]`, 'response:', response);
+    let response = await mfaRegService.getFidoAttestationOptions(fidoRpUuid,displayName);
+    console.log(`[${User.name}:getFidoRegistration(fidoRpUuid,displayName)]`, 'response:', response);
 
     return response;
   }
 
   /**
    * Process FIDO2 registration response
-   * @param {object} fidoRP Relying Party from {@link getFidoRelyingPartyies}
+   * @param {string} fidoRpUuid UUID of Relying Party
    * @param {object} data Response data from WebAuthn API.
    * @return {object} Registration result
    */
-  async processFidoRegistration(fidoRP,data) {
+  async processFidoRegistration(fidoRpUuid,data) {
     const mfaRegService = new MfaRegService(
       this._auth,
       this._config.tenantUrl);
 
-    let response = await mfaRegService.processFidoAttestationResult(fidoRP, data);
-    console.log(`[${User.name}:processFidoRegistration(fidoRP,data)]`, 'response:', response);
+    let response = await mfaRegService.processFidoAttestationResult(fidoRpUuid, data);
+    console.log(`[${User.name}:processFidoRegistration(fidoRpUuid,data)]`, 'response:', response);
 
     return response;
   }
