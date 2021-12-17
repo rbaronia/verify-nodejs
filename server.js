@@ -7,7 +7,7 @@ const cookieParser = require('cookie-parser'); // optional
 const session = require('express-session');
 const createError = require('http-errors');
 
-const Adaptive = require('adaptive-proxy-sdk');
+const Adaptive = require('@ibm-verify/adaptive-proxy');
 const OAuthClientCreds = require('./oauth-client-creds.js').OAuthClientCreds;
 const User = require('./verify-user-sdk/lib/index.js').User;
 
@@ -36,8 +36,8 @@ app.set('view engine', 'hbs');
 app.use('/static', express.static(__dirname + '/static'));
 
 // Define resources required for adaptive access.  Read from browser SDK package.
-app.use('/static/adaptive-v1.js', express.static(__dirname + '/node_modules/adaptive-browser-sdk/dist/adaptive-v1.min.js'));
-app.use('/icons/blank.gif', express.static(__dirname + '/node_modules/adaptive-browser-sdk/blank.gif'));
+app.use('/static/adaptive-v1.js', express.static(__dirname + '/node_modules/@ibm-verify/adaptive-browser/dist/adaptive-v1.min.js'));
+app.use('/icons/blank.gif', express.static(__dirname + '/node_modules/@ibm-verify/adaptive-browser/blank.gif'));
 
 var login = require('./routes/login');
 var mfa = require('./routes/mfa');

@@ -100,7 +100,7 @@ router.post('/assertion/result', async (req, res, _next) => {
   if (adaptive_enabled && req.query.sess) {
     req.session.sessionId = req.query.sess;
   } else {
-    req.session.sessionId = "";
+    req.session.sessionId = req.session.sessionId ? req.session.sessionId : "";
   }
 
   var ip = req.ip;

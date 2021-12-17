@@ -71,6 +71,7 @@ CLIENT_SECRET=xxxxxxxxxx
 AUTHENTICATOR_PROFILEID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 
 ADAPTIVE_ENABLED=false
+ADAPTIVE_OVERRIDE_IP=
 
 SESSION_SECRET=somethinghardtoguess
 SCOPE=oidc
