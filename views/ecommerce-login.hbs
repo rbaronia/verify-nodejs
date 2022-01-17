@@ -12,10 +12,14 @@
 
 	<title>Login - TrustMe Store</title>
 
+	<script> var tmglobals = {}</script>
 	{{#if adaptive}}
   	<!-- Paste web snippet here for Adaptive -->
+		<script src="/static/adaptive-v1.js"></script>
+		<script>startAdaptiveV1("d2jqvqg4kwgi9j.cloudfront.net", 567167);</script>
 
   	<script>
+		 tmglobals.adaptive = true;
   		window.addEventListener('load', function (e) {
     		var form = document.getElementsByName('login')[0];
     		form.addEventListener('submit', function (event) {
@@ -99,6 +103,20 @@
 						</div>
 						<script type="text/javascript" src="/static/js/qrpolling.js"></script>
 					{{/if}}
+
+					{{#if factors.fido2.enabled}}
+						<div class="sa_account-details-box-2">
+							<div class="sa_account-box-head">
+								<strong>FIDO Login</strong>
+							</div>
+							<div class="sa_formRow">
+								<p>Click here for FIDO2 login</p>
+								<button style="margin-top: 48px;" class="sa_cta-btn" onclick="fidoAuthenticate()">Authenticate</button>
+							</div>
+						</div>
+						<script src="/static/js/fido2.js"></script>
+					{{/if}}
+
 				</div>
 				New to TrustMe Shop? <a href="register" id="open-new-account-link" class="sa_link" data-t-open-new-account-link>Open an Account</a>
 			</div>

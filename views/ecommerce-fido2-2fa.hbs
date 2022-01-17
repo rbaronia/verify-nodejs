@@ -9,6 +9,8 @@
 
 	<link href="/static/fonts/fonts.css" type="text/css" rel="stylesheet">
 	<link href="/static/style.css" type="text/css" rel="stylesheet">
+	<script src="/static/js/fido2.js"></script>
+	<script>tmglobals = {}</script>
 
 	<title>Login - TrustMe Store</title>
 
@@ -28,27 +30,18 @@
 				<div class="sa_logo"><a href="/"><img src="/static/images/logo-shop.svg" alt="" id="shop-logo" data-t-ecommerce-logo></a></div>
 				<!--logo-->
 
-				<h2>{{message}}</h2>
+				<h2>Please complete FIDO2 Authentication</h2>
 				<br/>
 				<br/>
-
-				<form action="mfa/otp" method="post">
-					<div class="sa_formRow">
-						<label>OTP Value</label>
-						{{#if correlation}}
-						{{correlation}}-
-						{{/if}}
-						<input name="otp" id="otp" class="sy-input--text-username" type="text" placeholder="000000" onFocus="this.placeholder = ''" autocomplete="off">
-						<div class="inputLine"></div>
-					</div>
 
 					<div class="sa_formRow-container clearfix">
 						<div class="sa_formRow-col"> <a href="/mfa">Choose another method</a> </div>
 					</div>
 
-					<div class="sa_formRow_bottom">
-						<button type="submit" class="data-t-submit-login-btn">Submit</button>
-				</form>
+					<div class="sa_formRow-container clearfix">
+						<button onclick="fidoAuthenticate()" id="createSubmit" class="sa_cta-btn">Authenticate</button>
+					</div>
+				</div>
 			</div>
 		</div>
 	</div>

@@ -1,6 +1,5 @@
 const express = require('express');
 const router = express.Router();
-const Adaptive = require('adaptive-proxy-sdk');
 const createError = require('http-errors');
 
 // load contents of .env into process.env
@@ -12,7 +11,6 @@ const appClientConfig = {
   clientSecret: process.env.APP_CLIENT_SECRET,
 };
 
-const adaptive = new Adaptive(appClientConfig);
 const date = new Date();
 
 function getOtpLabel(item) {
@@ -20,7 +18,8 @@ function getOtpLabel(item) {
   if (item.type == "emailotp") return "E-mail OTP";
   if (item.type == "smsotp") return "SMS OTP";
   if (item.type == "voiceotp") return "Voice OTP";
-  //if (item.type == "signature") return "Mobile push";
+  if (item.type == "signature") return "Mobile push";
+  if (item.type == "fido2") return "FIDO2: " + item.attributes.nickname;
 }
 
 router.get('/', (req, res, next) => {
@@ -91,6 +90,7 @@ router.post('/', challengeMfa);
 async function challengeMfa(req, res, next) {
   var done = false;
   var factorLookup = req.session.factorLookup;
+  let adaptive = req.app.get('adaptiveClient');
 
   var ip = req.ip;
   if (process.env.ADAPTIVE_OVERRIDE_IP) {
@@ -115,6 +115,12 @@ async function challengeMfa(req, res, next) {
       res.render('ecommerce-otp-challenge', {
         message: message
       });
+      done = true;
+    }
+
+    if (factorLookup[req.body.factorid].type == "fido2") {
+      req.session.factor = factorLookup[req.body.factorid];
+      res.render('ecommerce-fido2-2fa');
       done = true;
     }
 
@@ -186,6 +192,7 @@ router.post('/otp', async (req, res, next) => {
 
   var done = false;
   var factor = req.session.factor;
+  let adaptive = req.app.get('adaptiveClient');
 
   if (!factor || !req.body.otp) {
     done = true;
@@ -235,6 +242,10 @@ router.post('/otp', async (req, res, next) => {
     }
   }
 
+  if (!done && otpresult && otpresult.status !="allow") {
+    console.log("**NOT ALLOWED** " + JSON.stringify(otpresult));
+  }
+
   if (!done && otpresult && otpresult.status == "allow") {
     req.session.authenticated = true;
     req.session.token = otpresult.token;
@@ -262,6 +273,7 @@ router.get('/pushcheck', async function(req, res, _next) {
   // Pass in the transaction id
 
   let result = undefined;
+  let adaptive = req.app.get('adaptiveClient');
 
   var ip = req.ip;
   if (process.env.ADAPTIVE_OVERRIDE_IP) {

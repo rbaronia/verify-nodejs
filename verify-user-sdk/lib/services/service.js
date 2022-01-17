@@ -91,7 +91,7 @@ class Service {
     'acceptHeader:', this._acceptHeader);
     console.log(`[${Service.name}:constructor(auth, baseURL, context, ` +
       `contentTypeHeader='json', acceptHeader='json')]`,
-    'authorizationHeader:', '****');
+    'authorizationHeader:', this._authorizationHeader);
   }
 
   /**

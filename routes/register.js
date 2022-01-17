@@ -95,7 +95,8 @@ router.post('/', async (req, res, next) => {
       accept: 'application/json',
       contentType: 'application/json',
       url: path,
-      data: JSON.stringify(body)
+      rawData: true,
+      data: body
       };
 
     try {

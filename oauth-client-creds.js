@@ -93,7 +93,7 @@ let apiRequest = async function(request, accessToken) {
     request.headers = headers;
     request.withCredentials = true;
 
-    if (request.data) {
+    if (request.data && !request.rawData) {
       let data = request.data;
       if (typeof data === 'object' || typeof data === 'boolean') {
         request.data = JSON.stringify(data);

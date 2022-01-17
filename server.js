@@ -7,7 +7,7 @@ const cookieParser = require('cookie-parser'); // optional
 const session = require('express-session');
 const createError = require('http-errors');
 
-const Adaptive = require('adaptive-proxy-sdk');
+const Adaptive = require('@ibm-verify/adaptive-proxy');
 const OAuthClientCreds = require('./oauth-client-creds.js').OAuthClientCreds;
 const User = require('./verify-user-sdk/lib/index.js').User;
 
@@ -36,18 +36,20 @@ app.set('view engine', 'hbs');
 app.use('/static', express.static(__dirname + '/static'));
 
 // Define resources required for adaptive access.  Read from browser SDK package.
-app.use('/static/adaptive-v1.js', express.static(__dirname + '/node_modules/adaptive-browser-sdk/dist/adaptive-v1.min.js'));
-app.use('/icons/blank.gif', express.static(__dirname + '/node_modules/adaptive-browser-sdk/blank.gif'));
+app.use('/static/adaptive-v1.js', express.static(__dirname + '/node_modules/@ibm-verify/adaptive-browser/dist/adaptive-v1.min.js'));
+app.use('/icons/blank.gif', express.static(__dirname + '/node_modules/@ibm-verify/adaptive-browser/blank.gif'));
 
 var login = require('./routes/login');
 var mfa = require('./routes/mfa');
 var register = require('./routes/register');
 var myaccount = require('./routes/myaccount');
+var fido = require('./routes/fido');
 
 app.use('/login', login);
 app.use('/mfa', mfa);
 app.use('/register', register);
 app.use('/myaccount', myaccount);
+app.use('/fido', fido);
 
 const clientAuthConfig = {
   tenantUrl: process.env.TENANT_URL,
@@ -59,6 +61,16 @@ var clientOauthClient;
 if (clientAuthConfig.clientId) {
   const clientOauthClient = new OAuthClientCreds(clientAuthConfig);
   app.set('verifyClient', clientOauthClient);
+}
+
+const adaptiveConfig = {
+  tenantUrl: process.env.TENANT_URL,
+  clientId: process.env.APP_CLIENT_ID,
+  clientSecret: process.env.APP_CLIENT_SECRET,
+};
+if(adaptiveConfig.clientId) {
+  const adaptive = new Adaptive(adaptiveConfig);
+  app.set('adaptiveClient', adaptive);
 }
 
 const mustBeAuthenticated = (req, res, next) => {
@@ -84,12 +96,14 @@ app.get('/home', mustBeAuthenticated, (req, res) => {
 app.get('/cart', mustBeAuthenticated, async (req, res) => {
   let scim;
   if (!req.session.user) {
-    let user = new User(clientAuthConfig,req.session.token.access_token);
+    let user = new User(clientAuthConfig,{accessToken: req.session.token.access_token});
     scim = await user.getUser();
     req.session.user = scim;
   } else {
     scim = req.session.user;
   }
+  scim.phoneNumbers = scim.phoneNumbers.filter(num => num.type == "mobile");
+  scim.addresses = scim.addresses.filter(add => add.type == "work");
   res.render('ecommerce-cart', scim);
 });
 
@@ -106,27 +120,32 @@ app.get('/success', mustBeAuthenticated, (req, res) => {
 });
 
 app.post('/checkout', mustBeAuthenticated, async (req, res) => {
-  let user = new User(clientAuthConfig,req.session.token.access_token);
+  let user = new User(clientAuthConfig,{accessToken: req.session.token.access_token});
   let currentUser = req.session.user;
 
-  if (req.body.storemobile == "on") {
+  if (req.body.storemobile == "on" && req.body.mobile) {
     if (!currentUser.phoneNumbers) currentUser.phoneNumbers = [];
-    currentUser.phoneNumbers[0] = {type: "mobile", value: req.body.mobile};
+    currentUser.phoneNumbers = currentUser.phoneNumbers.filter(num => num.type != "mobile");
+    currentUser.phoneNumbers.push({type: "mobile", value: req.body.mobile});
   }
 
   if (req.body.storeaddress == "on") {
     if (!currentUser.addresses) currentUser.addresses = [];
-    currentUser.addresses[0] = {type: "work",
+    currentUser.addresses = currentUser.addresses.filter(add => add.type != "work");
+    currentUser.addresses.push({type: "work",
       streetAddress: req.body.street,
       locality: req.body.city,
       region: req.body.region,
       country: req.body.country
-    };
+    });
   }
-
-  let result = await user.updateUser(currentUser);
-  req.session.user = result;
-
+  try {
+    let result = await user.updateUser(currentUser);
+    req.session.user = result;
+  } catch (e) {
+      if (e.response)
+        console.log(JSON.stringify(e.response.data));
+  }
   res.redirect('/success');
 });
 
@@ -136,10 +155,14 @@ app.post('/search', (req, res) => {
 
 // delete token from storage
 app.get('/logout', (req, res) => {
-  // get id from cookie
   delete req.session.authenticated;
   delete req.session.token;
   delete req.session.user;
+  delete req.session.factor;
+  delete req.session.transactionId;
+  delete req.session.factorLookup;
+  delete req.session.sessionId;
+  console.log(JSON.stringify(req.session));
   res.redirect('/');
 });
 
@@ -170,7 +193,7 @@ app.use(function(err, req, res, _next) {
 
 // Listen for requests.  HTTPS is needed for FIDO2.
 // Generate keys using create-crypto.sh
-if (process.env.FIDO2_ORIGIN) {
+if (process.env.FIDO2_RP_UUID) {
 	https.createServer({
 	    key: fs.readFileSync('./local.iamlab.key.pem'),
 	    cert: fs.readFileSync('./local.iamlab.cert.pem')

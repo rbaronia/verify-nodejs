@@ -3,7 +3,7 @@
  */
 
 // Require the Adaptive Proxy SDK library
-const Adaptive = require('adaptive-proxy-sdk');
+const Adaptive = require('@ibm-verify/adaptive-proxy');
 
 // Require readline package (to get user input)
 const readline = require('readline');
