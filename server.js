@@ -102,6 +102,8 @@ app.get('/cart', mustBeAuthenticated, async (req, res) => {
   } else {
     scim = req.session.user;
   }
+  scim.phoneNumbers = scim.phoneNumbers.filter(num => num.type == "mobile");
+  scim.addresses = scim.addresses.filter(add => add.type == "work");
   res.render('ecommerce-cart', scim);
 });
 
@@ -121,24 +123,29 @@ app.post('/checkout', mustBeAuthenticated, async (req, res) => {
   let user = new User(clientAuthConfig,{accessToken: req.session.token.access_token});
   let currentUser = req.session.user;
 
-  if (req.body.storemobile == "on") {
+  if (req.body.storemobile == "on" && req.body.mobile) {
     if (!currentUser.phoneNumbers) currentUser.phoneNumbers = [];
-    currentUser.phoneNumbers[0] = {type: "mobile", value: req.body.mobile};
+    currentUser.phoneNumbers = currentUser.phoneNumbers.filter(num => num.type != "mobile");
+    currentUser.phoneNumbers.push({type: "mobile", value: req.body.mobile});
   }
 
   if (req.body.storeaddress == "on") {
     if (!currentUser.addresses) currentUser.addresses = [];
-    currentUser.addresses[0] = {type: "work",
+    currentUser.addresses = currentUser.addresses.filter(add => add.type != "work");
+    currentUser.addresses.push({type: "work",
       streetAddress: req.body.street,
       locality: req.body.city,
       region: req.body.region,
       country: req.body.country
-    };
+    });
   }
-
-  let result = await user.updateUser(currentUser);
-  req.session.user = result;
-
+  try {
+    let result = await user.updateUser(currentUser);
+    req.session.user = result;
+  } catch (e) {
+      if (e.response)
+        console.log(JSON.stringify(e.response.data));
+  }
   res.redirect('/success');
 });
 
