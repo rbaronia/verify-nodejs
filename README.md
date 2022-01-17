@@ -70,6 +70,8 @@ CLIENT_SECRET=xxxxxxxxxx
 
 AUTHENTICATOR_PROFILEID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 
+FIDO2_RP_UUID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+
 ADAPTIVE_ENABLED=false
 ADAPTIVE_OVERRIDE_IP=
 
@@ -85,6 +87,7 @@ Parameter(s) | Location
 APP_CLIENT_ID and APP_CLIENT_SECRET | In "Sign-on" tab of the application definition.
 CLIENT_ID and CLIENT_SECRET | In properties of the privileged client you created under "API access" tab of the application definition.
 AUTHENTICATOR_PROFILEID | Under Security-->Registration profiles, select and entry and copy the Profile ID from details pane.
+FIDO2_RP_UUID | Not currently available in UI.  Capture with dev tools. RP definition must be created. [See FIDO2 below](#FIDO2)
 ADAPTIVE_ENABLED | Set to true to enable Adaptive Access functionality.  See below for additional pre-requisites.
 
 # Start the application
@@ -122,3 +125,16 @@ If you will connect to the demo application from the local machine you must prov
 
 ## Enable Adaptive Access in your Native Web App policy
 In the Native Web App policy that is associated with your application, enable Adaptive Access.  Initially at least you should set your post-authentication rules to allow access (so that only Adaptive Access is controlling the need for 2nd Factor Authentication).
+
+# FIDO2
+To enable FIDO2 you must access the application using a hostname with a domain component.  You may have already set this up for Adaptive Access.  Set up an alias in your local /etc/hosts file if you don't have a real DNS host.
+
+## Create FIDO2 Relying Party
+Under Authentication-->FIDO2 Settings, create a new Relying Party definition.
+Set the Relying Party identifier to the fully-qualified hostname clients will use to access the demo application (do not include port numbers here).
+Select *Include all device metadata* to allow all types of FIDO2 device.
+Add a URL for the base URL that clients will use to access the application.  This should include port number if not 80 or 443.
+Save the new Relying Party.
+
+## Get RP UUID
+You will need the UUID of this Relying Party.  This is not currently available in the Admin UI but you can obtain it using browser developer tools to read from the REST request made when reading all RP definitions (look for request for .../metadata).
