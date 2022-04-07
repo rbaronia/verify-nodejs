@@ -20,7 +20,7 @@
 
 const ConfigurationError = require('./errors/configurationError');
 const ScimService = require('./services/users/scimService');
-const MfaRegService = require('./services/users/MfaRegService');
+const MfaRegService = require('./services/users/mfaRegService');
 
 /**
  * Class representing the User SDK. Used to perform SCIM operations
