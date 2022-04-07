@@ -102,8 +102,8 @@ app.get('/cart', mustBeAuthenticated, async (req, res) => {
   } else {
     scim = req.session.user;
   }
-  scim.phoneNumbers = scim.phoneNumbers.filter(num => num.type == "mobile");
-  scim.addresses = scim.addresses.filter(add => add.type == "work");
+  scim.phoneNumbers = scim.phoneNumbers ? scim.phoneNumbers.filter(num => num.type == "mobile") : [];
+  scim.addresses = scim.addresses ? scim.addresses.filter(add => add.type == "work") : [];
   res.render('ecommerce-cart', scim);
 });
 
