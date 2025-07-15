@@ -1,28 +1,56 @@
-# Introduction
-This repository holds a demonstration consumer application which uses IBM Security Verify to provide registration, policy-based authentication (first-factor and optional multi-factor), and account management.  It uses the IBM Security Verify Adaptive SDK for all functionality.
+# IBM Security Verify Node.js Demo Application
 
-A cookbook which uses this application, with step-by-step setup instructions and exploration of the associated REST APIs using Postman, is available on IBM Security Learning Academy.  [Access the cookbook here](https://www.securitylearningacademy.com/course/view.php?id=6114) (IBMid login required).
+This repository contains a demonstration consumer application that uses IBM Security Verify to provide:
+- User registration
+- Policy-based authentication (first-factor and optional multi-factor)
+- Account management
+
+The application leverages the IBM Security Verify Adaptive SDK for all core functionality.
+
+A step-by-step setup guide and REST API exploration (using Postman) would be provided.
+
+---
+
+## Features
+- Registration and login with IBM Security Verify
+- Support for multi-factor authentication (MFA)
+- Account management capabilities
+- Adaptive Access support (optional)
+- FIDO2 authentication (optional)
+
+---
+
+## Project Structure
+- `/views/` &mdash; Handlebars templates for UI
+- `/routes/` &mdash; Express route handlers
+- `/public/` &mdash; Static assets (JS, CSS, images)
+- `app.js` &mdash; Main application entry point
+- `.env` &mdash; Environment configuration
+
+---
 
 # Installation
 Follow these steps to install the application on your system.
 
-## Pre-requistes
-You must have NodeJS installed and the npm (node package manager).  In order to clone the repository you will need to have git installed.
+## Prerequisites
+- Node.js and npm (Node Package Manager)
+- Git (for cloning the repository)
 
 ## Clone this repository
-If you have git installed you can clone this repository with the command:
 ```bash
-git clone https://github.com/iamexploring/verify-nodejs
-```
-## Install required node packages
-Run the following commands to download the packages to the cloned application directory:
-```bash
+git clone https://github.com/rbaronia/verify-nodejs.git
 cd verify-nodejs
+```
+
+## Install dependencies
+Before installing dependencies, add execute permission and run the setup script in one line:
+```bash
+chmod +x setup.sh && ./setup.sh
 npm install
 ```
 
-# IBM Security Verify configuration
-Before you can use this application, you must configure your IBM Securiy Verify tenant to work with it.
+# IBM Security Verify Configuration
+Before using this application, configure your IBM Security Verify tenant as follows:
 
 ## Create a Native Web Policy
 In IBM Security Verify, create a new "Native Web App" policy.  Initially, take all the defaults.
@@ -50,91 +78,107 @@ Add an additional (privileged) API client and give it the following access:
 - Manage second-factor authentication enrollment for all users
 - Manage users and standard groups
 
-# Configure Application
-The sample application is configured using a .env file.
-First, copy the dotenv.sample file:
-```bash
-cp dotenv.sample .env
-```
+# Application Configuration
+The sample application is configured using a `.env` file.
 
-Complete the .env file.  It has the following content:
+1. Copy the sample environment file:
+   ```bash
+   cp dotenv.sample .env
+   ```
+2. Edit `.env` and fill in your IBM Security Verify tenant and application details:
+   ```env
+   TENANT_URL=https://xxxxx.verify.ibm.com
+   APP_CLIENT_ID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+   APP_CLIENT_SECRET=xxxxxxxxxx
+   CLIENT_ID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+   CLIENT_SECRET=xxxxxxxxxx
+   AUTHENTICATOR_PROFILEID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+   FIDO2_RP_UUID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+   ADAPTIVE_ENABLED=false
+   ADAPTIVE_OVERRIDE_IP=
+   SESSION_SECRET=somethinghardtoguess
+   SCOPE=oidc
+   ```
 
-```
-TENANT_URL=https://xxxxx.verify.ibm.com
+- **TENANT_URL**: Your IBM Security Verify tenant URL
+- **APP_CLIENT_ID/SECRET**: In "Sign-on" tab of your application definition
+- **CLIENT_ID/SECRET**: In the privileged client under "API access" tab
+- **AUTHENTICATOR_PROFILEID**: Under Security → Registration profiles
+- **FIDO2_RP_UUID**: See [FIDO2 section](#fido2) below
+- **ADAPTIVE_ENABLED**: Set to `true` to enable Adaptive Access
+- **ADAPTIVE_OVERRIDE_IP**: (Optional) Your public IP if running locally
 
-APP_CLIENT_ID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
-APP_CLIENT_SECRET=xxxxxxxxxx
-
-CLIENT_ID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
-CLIENT_SECRET=xxxxxxxxxx
-
-AUTHENTICATOR_PROFILEID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
-
-FIDO2_RP_UUID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
-
-ADAPTIVE_ENABLED=false
-ADAPTIVE_OVERRIDE_IP=
-
-SESSION_SECRET=somethinghardtoguess
-SCOPE=oidc
-```
-
-The TENANT_URL is the URL for your IBM Security Verify tenant.
-
-The other values can be found in the following locations in the IBM Security Verify admin UI:
-Parameter(s) | Location
---- | ---
-APP_CLIENT_ID and APP_CLIENT_SECRET | In "Sign-on" tab of the application definition.
-CLIENT_ID and CLIENT_SECRET | In properties of the privileged client you created under "API access" tab of the application definition.
-AUTHENTICATOR_PROFILEID | Under Security-->Registration profiles, select and entry and copy the Profile ID from details pane.
-FIDO2_RP_UUID | Not currently available in UI.  Capture with dev tools. RP definition must be created. [See FIDO2 below](#FIDO2)
-ADAPTIVE_ENABLED | Set to true to enable Adaptive Access functionality.  See below for additional pre-requisites.
-
-# Start the application
-Once you have completed the steps above, you can start the application with this command:
+# Running the Application
+After completing the steps above, start the application:
 ```bash
 npm start
 ```
 
-You can connect to the application at http://localhost:3000
+Visit [http://localhost:3000](http://localhost:3000) in your browser.
 
-# Adaptive access
-This application can be used to demonstrate Adaptive Access if this is available in your IBM Security Verify tenant.  Follow the steps below.
+# Adaptive Access (Optional)
+This application can demonstrate Adaptive Access if your IBM Security Verify tenant supports it.
 
-## On-board your Application
-In the Application definition, go to the **Adaptive sign-on** tab and enter an *Allowed domain*.  You must access the application using a host within this domain in order for Adaptive Access to function correctly.  Set up an alias in your local /etc/hosts file if you don't have a real DNS host.
+1. **On-board your Application**
+   - In your application definition, go to the **Adaptive sign-on** tab and enter an *Allowed domain* (e.g., `myapp.local`).
+   - Set up a local alias in `/etc/hosts` if needed.
+   - Click **Generate** to start onboarding. This can take an hour or more.
+   - When onboarding completes, copy the provided web snippet.
+2. **Add the Web Snippet**
+   - Open `views/ecommerce-login.hbs` and find:
+     ```html
+     <!-- Paste web snippet here for Adaptive -->
+     ```
+   - Paste the snippet at this location.
+3. **Enable Adaptive in `.env`**
+   - Set `ADAPTIVE_ENABLED=true` in your `.env` file.
+4. **Override Local IP (if needed)**
+   - Set `ADAPTIVE_OVERRIDE_IP=<your_public_ip>` in `.env` if running locally. (Find your IP at https://www.whatismyip.com/)
+5. **Enable Adaptive Access in Policy**
+   - In your Native Web App policy, enable Adaptive Access and set post-authentication rules appropriately.
 
-Click **Generate**.  This starts the on-boarding process.  It can take some time (an hour or more) to complete.  You can leave the page and check back later.
+# FIDO2 (Optional)
+To enable FIDO2 authentication:
 
-When the on-boarding is complete, the page will show a web snippet.  You will need to add this to the application login page.
+1. Access the application with a fully-qualified hostname (e.g., `myapp.local`). Set up a local alias if needed.
+2. In IBM Security Verify Admin UI:
+   - Go to **Authentication → FIDO2 Settings**
+   - Create a new Relying Party with the identifier set to your application's hostname (no port numbers)
+   - Select *Include all device metadata*
+   - Add the application's base URL (include port if not 80/443)
+   - Save the Relying Party
+3. Obtain the **RP UUID** using browser dev tools (see REST request for `/metadata`).
 
-## Add web snippet to login page
-Open the *views/ecommerce-login.hbs* file.  In this file, locate the line:
+---
+
+# Troubleshooting
+
+## Cannot find module '@ibm-verify/adaptive-proxy'
+
+If you see an error like:
 
 ```
-  	<!-- Paste web snippet here for Adaptive -->
+Error: Cannot find module '@ibm-verify/adaptive-proxy'
 ```
 
-Paste the web snippet from the application definition into the page at this point.
+or
 
-## Enable Adaptive function in .env file
-In the *.env* file, set `ADAPTIVE_ENABLED=true`.
+```
+Error: Cannot find module '/.../node_modules/@ibm-verify/adaptive-proxy/sdk/adaptive-proxy/lib/index.js'. Please verify that the package.json has a valid "main" entry
+```
 
-## Override local IP address if connecting locally
-If you will connect to the demo application from the local machine you must provide your internet IP address so that this can override the local address that will otherwise be reported.  In the *.env* file, set `ADAPTIVE_OVERRIDE_IP=x.x.x.x` where `x.x.x.x` is your internet IP address.  To determine this address, you can use a service such as https://www.whatismyip.com/.
-
-## Enable Adaptive Access in your Native Web App policy
-In the Native Web App policy that is associated with your application, enable Adaptive Access.  Initially at least you should set your post-authentication rules to allow access (so that only Adaptive Access is controlling the need for 2nd Factor Authentication).
-
-# FIDO2
-To enable FIDO2 you must access the application using a hostname with a domain component.  You may have already set this up for Adaptive Access.  Set up an alias in your local /etc/hosts file if you don't have a real DNS host.
-
-## Create FIDO2 Relying Party
-Under Authentication-->FIDO2 Settings, create a new Relying Party definition.
-Set the Relying Party identifier to the fully-qualified hostname clients will use to access the demo application (do not include port numbers here).
-Select *Include all device metadata* to allow all types of FIDO2 device.
-Add a URL for the base URL that clients will use to access the application.  This should include port number if not 80 or 443.
-Save the new Relying Party.
-
-## Get RP UUID
-You will need the UUID of this Relying Party.  This is not currently available in the Admin UI but you can obtain it using browser developer tools to read from the REST request made when reading all RP definitions (look for request for .../metadata).
+**Resolution:**
+1. Make sure you have run `./setup.sh` before `npm install`.
+2. If the error persists, update the `main` field in `verify-sdk-javascript/sdk/adaptive-proxy/package.json` to:
+   ```json
+   "main": "lib/index.js"
+   ```
+3. Remove `node_modules` and `package-lock.json`:
+   ```bash
+   rm -rf node_modules package-lock.json
+   npm install
+   ```
+4. Then start the application:
+   ```bash
+   npm start
+   ```
