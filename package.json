@@ -8,7 +8,7 @@
 	},
 	"dependencies": {
 		"@ibm-verify/adaptive-browser": "^1.2.0",
-		"@ibm-verify/adaptive-proxy": "git+https://github.com/rbaronia/verify-sdk-javascript.git",
+		"@ibm-verify/adaptive-proxy": "file:./verify-sdk-javascript/sdk/adaptive-proxy",
 		"axios": "^0.21.1",
 		"body-parser": "^1.18.3",
 		"cookie-parser": "^1.4.3",
