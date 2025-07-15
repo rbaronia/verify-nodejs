@@ -8,5 +8,4 @@ env.*
 
 # Ignore all files in verify-sdk-javascript except .gitkeep
 verify-sdk-javascript/*
-!verify-sdk-javascript/.gitkeep
 verify-sdk-javascript/
